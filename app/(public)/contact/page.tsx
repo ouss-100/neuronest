@@ -1,16 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import {
-  Mail,
-  Phone,
-  MapPin,
-  ChevronDown,
-  Youtube,
-  Twitter,
-  Facebook,
-} from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { insertContact } from "@/server/contactActions";
 import { useState } from "react";
+import { ContactFormData, Role } from "@/types/contact";
 import { faqs, contactInfo, socialIcons } from "@/assets/assets";
 
 import { fadeUp } from "@/lib/animations";
@@ -18,14 +12,63 @@ import { fadeUp } from "@/lib/animations";
 const Contact = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+  const [formData, setFormData] = useState<ContactFormData>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    role: "",
+    message: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.role) return;
+
+    setLoading(true);
+    setSuccess("");
+
+    try {
+      await insertContact({
+        ...formData,
+        role: formData.role as Role,
+      });
+
+      setSuccess("Message sent successfully!");
+
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        role: "",
+        message: "",
+      });
+    } catch (err) {
+      console.error(err);
+      setSuccess("Failed to send message.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
-      {/* Contact Section */}
       {/* Contact Section */}
       <section className="section-spacer">
         <div className="container-narrow">
           {/* Header */}
-          <motion.div {...fadeUp()} className="text-center mb-16">
+          <motion.div {...fadeUp()} className="text-center mb-5">
             <h1 className="text-4xl lg:text-5xl font-heading font-bold text-foreground">
               Get in Touch
             </h1>
@@ -40,17 +83,41 @@ const Contact = () => {
               <h2 className="font-heading font-bold text-xl text-foreground mb-5">
                 Send us a message
               </h2>
-              <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-5" onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <input className="input-soft" placeholder="First name" />
-                  <input className="input-soft" placeholder="Last name" />
+                  <input
+                    className="input-soft"
+                    placeholder="First name"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    required
+                  />
+                  <input
+                    className="input-soft"
+                    placeholder="Last name"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    required
+                  />
                 </div>
                 <input
                   className="input-soft"
                   type="email"
                   placeholder="Email address"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
                 />
-                <select className="input-soft" defaultValue="">
+                <select
+                  className="input-soft"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  required
+                >
                   <option value="" disabled>
                     I am a...
                   </option>
@@ -62,10 +129,21 @@ const Contact = () => {
                 <textarea
                   className="input-soft min-h-[140px] resize-none"
                   placeholder="How can we help?"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
                 />
-                <button type="submit" className="btn-accent w-full mt-2">
-                  Send Message
+                <button
+                  type="submit"
+                  className="btn-accent w-full mt-2"
+                  disabled={loading}
+                >
+                  {loading ? "Sending..." : "Send Message"}
                 </button>
+                {success && (
+                  <p className="text-sm mt-2 text-green-500">{success}</p>
+                )}
               </form>
             </motion.div>
 
