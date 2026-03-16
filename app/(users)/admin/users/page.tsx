@@ -1,13 +1,45 @@
+"use client";
+
 import { motion } from "framer-motion";
 import { Search, MoreHorizontal, UserCheck, UserX } from "lucide-react";
 import { useState } from "react";
 
 const users = [
-  { name: "Sarah Johnson", email: "sarah@example.com", role: "Parent", status: "active", joined: "Jan 15, 2026" },
-  { name: "Dr. James Smith", email: "james@clinic.com", role: "Doctor", status: "active", joined: "Dec 1, 2025" },
-  { name: "Wei Chen", email: "wei@example.com", role: "Parent", status: "active", joined: "Feb 20, 2026" },
-  { name: "Dr. Lisa Park", email: "lisa@hospital.com", role: "Doctor", status: "inactive", joined: "Nov 10, 2025" },
-  { name: "Ana Martinez", email: "ana@example.com", role: "Parent", status: "active", joined: "Mar 5, 2026" },
+  {
+    name: "Sarah Johnson",
+    email: "sarah@example.com",
+    role: "Parent",
+    status: "active",
+    joined: "Jan 15, 2026",
+  },
+  {
+    name: "Dr. James Smith",
+    email: "james@clinic.com",
+    role: "Doctor",
+    status: "active",
+    joined: "Dec 1, 2025",
+  },
+  {
+    name: "Wei Chen",
+    email: "wei@example.com",
+    role: "Parent",
+    status: "active",
+    joined: "Feb 20, 2026",
+  },
+  {
+    name: "Dr. Lisa Park",
+    email: "lisa@hospital.com",
+    role: "Doctor",
+    status: "inactive",
+    joined: "Nov 10, 2025",
+  },
+  {
+    name: "Ana Martinez",
+    email: "ana@example.com",
+    role: "Parent",
+    status: "active",
+    joined: "Mar 5, 2026",
+  },
 ];
 
 const AdminUsers = () => {
@@ -16,8 +48,12 @@ const AdminUsers = () => {
   return (
     <div className="space-y-6 max-w-5xl">
       <div>
-        <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">User Management</h1>
-        <p className="text-muted-foreground mt-1">Manage parents, doctors, and administrators</p>
+        <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">
+          User Management
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          Manage parents, doctors, and administrators
+        </p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -31,7 +67,9 @@ const AdminUsers = () => {
               key={f}
               onClick={() => setFilter(f)}
               className={`px-4 py-2.5 rounded-xl text-sm font-heading font-semibold transition-all ${
-                filter === f ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                filter === f
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
             >
               {f}
@@ -54,14 +92,22 @@ const AdminUsers = () => {
                 {user.name[0]}
               </div>
               <div>
-                <p className="font-heading font-semibold text-foreground text-sm">{user.name}</p>
+                <p className="font-heading font-semibold text-foreground text-sm">
+                  {user.name}
+                </p>
                 <p className="text-xs text-muted-foreground">{user.email}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <span className="badge-active text-xs">{user.role}</span>
-              <span className={`flex items-center gap-1 text-xs font-semibold ${user.status === "active" ? "text-secondary" : "text-muted-foreground"}`}>
-                {user.status === "active" ? <UserCheck className="w-3 h-3" /> : <UserX className="w-3 h-3" />}
+              <span
+                className={`flex items-center gap-1 text-xs font-semibold ${user.status === "active" ? "text-secondary" : "text-muted-foreground"}`}
+              >
+                {user.status === "active" ? (
+                  <UserCheck className="w-3 h-3" />
+                ) : (
+                  <UserX className="w-3 h-3" />
+                )}
                 {user.status}
               </span>
               <button className="p-1.5 rounded-lg hover:bg-muted transition-colors">

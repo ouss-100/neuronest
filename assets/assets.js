@@ -1,7 +1,7 @@
 import heroIllustration from "./images/hero-illustration.png";
 import aboutIllustration from "./images/about-illustration.png";
 import doctorIllustration from "./images/doctor-illustration.png";
-
+import logo from "./images/logo.png";
 import {
   Shield,
   Brain,
@@ -20,6 +20,7 @@ export const images = {
   heroIllustration,
   aboutIllustration,
   doctorIllustration,
+  logo,
 };
 
 export const steps = [
@@ -104,7 +105,7 @@ export const disorders = [
 export const faqs = [
   {
     q: "Is this a medical diagnosis?",
-    a: "No. LearnBright provides an AI-powered screening, not a diagnosis. Results should be reviewed with a qualified professional.",
+    a: "No. neuronest provides an AI-powered screening, not a diagnosis. Results should be reviewed with a qualified professional.",
   },
   {
     q: "What age range is the assessment for?",

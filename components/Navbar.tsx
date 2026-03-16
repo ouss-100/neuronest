@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sun, Moon } from "lucide-react";
+import { images } from "@/assets/assets";
+import Image from "next/image";
 
 const navLinks = [
   { label: "Home", to: "/" },
@@ -16,20 +19,27 @@ const navLinks = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
+  const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
 
   return (
     <nav className="glass-nav sticky top-0 z-50">
       <div className="container-narrow flex items-center justify-between h-16 lg:h-20">
-        
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-heading font-bold text-lg">
-              L
-            </span>
-          </div>
+          <Image
+            src={images.logo}
+            alt="LearnBright Logo"
+            className="w-15 h-10 object-contain"
+            priority
+          />
           <span className="font-heading font-bold text-xl text-foreground">
-            LearnBright
+            neuro<span className="text-primary">nest</span>
           </span>
         </Link>
 
@@ -50,7 +60,7 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Desktop Buttons */}
+        {/* Desktop Buttons + Theme Toggle */}
         <div className="hidden md:flex items-center gap-3">
           <Link
             href="/login"
@@ -58,25 +68,47 @@ export default function Navbar() {
           >
             Log In
           </Link>
-          <Link
-            href="/register"
-            className="btn-accent !px-5 !py-2.5 text-sm"
-          >
+          <Link href="/register" className="btn-accent !px-5 !py-2.5 text-sm">
             Get Started
           </Link>
+
+          {/* Theme Toggle Button */}
+          <motion.button
+            onClick={toggleTheme}
+            className="ml-2 p-2 rounded-full border border-border hover:bg-muted transition-colors"
+            whileTap={{ rotate: 20 }}
+            whileHover={{ scale: 1.1 }}
+          >
+            {theme === "light" ? (
+              <Sun className="w-5 h-5 text-yellow-400" />
+            ) : (
+              <Moon className="w-5 h-5 text-blue-400" />
+            )}
+          </motion.button>
         </div>
 
         {/* Mobile Toggle */}
-        <button
-          className="md:hidden p-2 rounded-xl hover:bg-muted transition-colors"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? (
-            <X className="w-6 h-6" />
-          ) : (
-            <Menu className="w-6 h-6" />
-          )}
-        </button>
+        <div className="flex md:hidden items-center gap-2">
+          <motion.button
+            onClick={toggleTheme}
+            className="p-2 rounded-full border border-border hover:bg-muted transition-colors"
+            whileTap={{ rotate: 20 }}
+            whileHover={{ scale: 1.1 }}
+          >
+            {theme === "light" ? (
+              <Sun className="w-5 h-5 text-yellow-400" />
+            ) : (
+              <Moon className="w-5 h-5 text-blue-400" />
+            )}
+          </motion.button>
+
+          <button
+            className="p-2 rounded-xl hover:bg-muted transition-colors"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -95,9 +127,7 @@ export default function Navbar() {
                   href={link.to}
                   onClick={() => setMobileOpen(false)}
                   className={`font-heading font-semibold py-2 ${
-                    pathname === link.to
-                      ? "text-primary"
-                      : "text-muted-foreground"
+                    pathname === link.to ? "text-primary" : "text-muted-foreground"
                   }`}
                 >
                   {link.label}

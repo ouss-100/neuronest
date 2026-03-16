@@ -1,6 +1,7 @@
+"use client";
+
 import { motion } from "framer-motion";
 import Link from "next/link";
-
 import { ArrowLeft, Stethoscope, Calendar } from "lucide-react";
 import { notes } from "@/assets/assets";
 

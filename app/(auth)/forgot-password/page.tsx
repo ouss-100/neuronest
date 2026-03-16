@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Mail, ArrowLeft } from "lucide-react";
 import { fadeUp } from "@/lib/animations";
+import { images } from "@/assets/assets";
 
 const ForgotPassword = () => (
   <div className="min-h-screen flex items-center justify-center bg-background px-6">
@@ -15,11 +17,17 @@ const ForgotPassword = () => (
     >
       {/* Header */}
       <motion.div {...fadeUp()} className="text-center mb-8">
-        <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center mx-auto mb-6">
-          <span className="text-primary-foreground font-heading font-bold text-xl">
-            L
+        <Link href="/" className="inline-flex items-center gap-2 mb-6">
+          <Image
+            src={images.logo}
+            alt="LearnBright Logo"
+            className="w-15 h-10 object-contain"
+            priority
+          />
+          <span className="font-heading font-bold text-xl text-foreground">
+            neuro<span className="text-primary">nest</span>
           </span>
-        </div>
+        </Link>
         <h1 className="text-3xl font-heading font-bold text-foreground">
           Reset your password
         </h1>

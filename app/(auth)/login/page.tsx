@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Mail, Lock, ArrowRight } from "lucide-react";
 import { fadeUp } from "@/lib/animations";
+import { images } from "@/assets/assets";
 
 const Login = () => (
   <div className="min-h-screen flex items-center justify-center bg-background px-6">
@@ -16,11 +18,15 @@ const Login = () => (
       {/* Header */}
       <motion.div {...fadeUp()} className="text-center mb-8">
         <Link href="/" className="inline-flex items-center gap-2 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-heading font-bold text-xl">
-              L
-            </span>
-          </div>
+          <Image
+            src={images.logo}
+            alt="LearnBright Logo"
+            className="w-15 h-10 object-contain"
+            priority
+          />
+          <span className="font-heading font-bold text-xl text-foreground">
+            neuro<span className="text-primary">nest</span>
+          </span>
         </Link>
         <h1 className="text-3xl font-heading font-bold text-foreground">
           Welcome back

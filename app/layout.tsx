@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import ThemeProviderWrapper from "@/components/ThemeProviderWrapper";
 import "./globals.css";
 
 const inter = Inter({
@@ -25,9 +26,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${plusJakarta.variable} antialiased`}>
-        {children}
+        <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
       </body>
     </html>
   );

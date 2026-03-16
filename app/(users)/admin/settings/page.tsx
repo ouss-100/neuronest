@@ -1,4 +1,5 @@
 "use client";
+
 const AdminSettings = () => (
   <div className="space-y-6 max-w-3xl">
     <div>

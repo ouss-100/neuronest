@@ -1,7 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, ChevronDown } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  ChevronDown,
+  Youtube,
+  Twitter,
+  Facebook,
+} from "lucide-react";
 import { useState } from "react";
 import { faqs } from "@/assets/assets";
 import { fadeUp } from "@/lib/animations";
@@ -57,22 +65,45 @@ const Contact = () => {
             </motion.div>
 
             {/* Info Section */}
-            <motion.div {...fadeUp()} className="space-y-8">
-              {[
-                { icon: Mail, label: "support@learnbright.com" },
-                { icon: Phone, label: "+1 (555) 123-4567" },
-                { icon: MapPin, label: "San Francisco, CA" },
-              ].map((info) => (
-                <div key={info.label} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                    <info.icon className="w-5 h-5" />
+            <div className="flex flex-col justify-center items-center">
+              <motion.div
+                {...fadeUp()}
+                className="space-y-8 flex flex-col justify-start items-start"
+              >
+                {[
+                  { icon: Mail, label: "support@learnbright.com" },
+                  { icon: Phone, label: "+1 (555) 123-4567" },
+                  { icon: MapPin, label: "San Francisco, CA" },
+                ].map((info) => (
+                  <div
+                    key={info.label}
+                    className="flex items-center gap-3 justify-center"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                      <info.icon className="w-5 h-5" />
+                    </div>
+                    <span className="text-foreground font-medium text-sm">
+                      {info.label}
+                    </span>
                   </div>
-                  <span className="text-foreground font-medium text-sm">
-                    {info.label}
-                  </span>
-                </div>
-              ))}
-            </motion.div>
+                ))}
+              </motion.div>
+
+              <motion.div
+                {...fadeUp()}
+                className="flex justify-center items-center mt-8 gap-4"
+              >
+                {[Youtube, Twitter, Facebook].map((Icon, idx) => (
+                  <motion.div
+                    key={idx}
+                    whileHover={{ scale: 1.2 }}
+                    className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center cursor-pointer transition-colors"
+                  >
+                    <Icon className="w-5 h-5" />
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -80,7 +111,10 @@ const Contact = () => {
       {/* FAQ Section */}
       <section className="py-16">
         <div className="container mx-auto px-4 max-w-3xl">
-          <motion.h2 {...fadeUp()} className="font-display text-2xl md:text-3xl font-bold text-foreground mb-8 text-center">
+          <motion.h2
+            {...fadeUp()}
+            className="font-display text-2xl md:text-3xl font-bold text-foreground mb-8 text-center"
+          >
             Frequently Asked Questions
           </motion.h2>
 
