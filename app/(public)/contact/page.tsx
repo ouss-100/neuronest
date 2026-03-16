@@ -11,7 +11,8 @@ import {
   Facebook,
 } from "lucide-react";
 import { useState } from "react";
-import { faqs } from "@/assets/assets";
+import { faqs, contactInfo, socialIcons } from "@/assets/assets";
+
 import { fadeUp } from "@/lib/animations";
 
 const Contact = () => {
@@ -19,6 +20,7 @@ const Contact = () => {
 
   return (
     <div>
+      {/* Contact Section */}
       {/* Contact Section */}
       <section className="section-spacer">
         <div className="container-narrow">
@@ -32,14 +34,14 @@ const Contact = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
             {/* Contact Form */}
-            <motion.div {...fadeUp()} className="card-soft !p-8">
-              <h2 className="font-heading font-bold text-xl text-foreground mb-6">
+            <motion.div {...fadeUp()} className="card-soft p-5">
+              <h2 className="font-heading font-bold text-xl text-foreground mb-5">
                 Send us a message
               </h2>
-              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <input className="input-soft" placeholder="First name" />
                   <input className="input-soft" placeholder="Last name" />
                 </div>
@@ -48,62 +50,72 @@ const Contact = () => {
                   type="email"
                   placeholder="Email address"
                 />
-                <select className="input-soft">
-                  <option>I'm a parent</option>
-                  <option>I'm a healthcare professional</option>
-                  <option>I'm an educator</option>
+                <select className="input-soft" defaultValue="">
+                  <option value="" disabled>
+                    I am a...
+                  </option>
+                  <option>Parent</option>
+                  <option>Healthcare professional</option>
+                  <option>Educator</option>
                   <option>Other</option>
                 </select>
                 <textarea
-                  className="input-soft min-h-[120px] resize-none"
+                  className="input-soft min-h-[140px] resize-none"
                   placeholder="How can we help?"
                 />
-                <button type="submit" className="btn-accent w-full">
+                <button type="submit" className="btn-accent w-full mt-2">
                   Send Message
                 </button>
               </form>
             </motion.div>
 
-            {/* Info Section */}
-            <div className="flex flex-col justify-center items-center">
-              <motion.div
-                {...fadeUp()}
-                className="space-y-8 flex flex-col justify-start items-start"
-              >
-                {[
-                  { icon: Mail, label: "support@learnbright.com" },
-                  { icon: Phone, label: "+1 (555) 123-4567" },
-                  { icon: MapPin, label: "San Francisco, CA" },
-                ].map((info) => (
-                  <div
-                    key={info.label}
-                    className="flex items-center gap-3 justify-center"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                      <info.icon className="w-5 h-5" />
-                    </div>
-                    <span className="text-foreground font-medium text-sm">
-                      {info.label}
-                    </span>
-                  </div>
-                ))}
-              </motion.div>
+            {/* Contact Info */}
+            <motion.div
+              {...fadeUp()}
+              className="flex flex-col justify-between py-8 lg:py-12"
+            >
+              <div className="space-y-8">
+                <h2 className="font-heading font-bold text-xl text-foreground mb-8">
+                  Contact Information
+                </h2>
 
-              <motion.div
-                {...fadeUp()}
-                className="flex justify-center items-center mt-8 gap-4"
-              >
-                {[Youtube, Twitter, Facebook].map((Icon, idx) => (
-                  <motion.div
-                    key={idx}
-                    whileHover={{ scale: 1.2 }}
-                    className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center cursor-pointer transition-colors"
-                  >
-                    <Icon className="w-5 h-5" />
-                  </motion.div>
-                ))}
-              </motion.div>
-            </div>
+                <div className="space-y-6">
+                  {contactInfo.map((info) => (
+                    <div
+                      key={info.label}
+                      className="flex items-center gap-4 group"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                        <info.icon className="w-5 h-5" />
+                      </div>
+                      <span className="text-foreground font-medium">
+                        {info.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-8">
+                  <h3 className="font-heading font-semibold text-foreground mb-4">
+                    Follow us
+                  </h3>
+                  <div className="flex gap-3">
+                    {socialIcons.map(({ icon: Icon, url }, idx) => (
+                      <motion.a
+                        key={idx}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        whileHover={{ scale: 1.1, y: -2 }}
+                        className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center cursor-pointer hover:bg-primary hover:text-white transition-colors"
+                      >
+                        <Icon className="w-5 h-5" />
+                      </motion.a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>

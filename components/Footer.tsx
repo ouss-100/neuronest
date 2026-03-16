@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Heart } from "lucide-react";
-import { images } from "@/assets/assets";
+import { images, socialIcons } from "@/assets/assets";
+import { motion } from "framer-motion";
 
 const Footer = () => (
   <footer className="bg-card border-t border-border/50 py-12">
@@ -24,6 +27,25 @@ const Footer = () => (
           <p className="text-sm text-muted-foreground leading-relaxed">
             Helping every child discover their unique way of learning.
           </p>
+          <div className="pt-8">
+            <h3 className="font-heading font-semibold text-foreground mb-4">
+              Follow us
+            </h3>
+            <div className="flex gap-3">
+              {socialIcons.map(({ icon: Icon, url }, idx) => (
+                <motion.a
+                  key={idx}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.1, y: -2 }}
+                  className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center cursor-pointer hover:bg-primary hover:text-white transition-colors"
+                >
+                  <Icon className="w-5 h-5" />
+                </motion.a>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div>

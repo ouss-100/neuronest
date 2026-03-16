@@ -14,6 +14,12 @@ import {
   Puzzle,
   Stethoscope,
   ClipboardList,
+  Mail,
+  Phone,
+  MapPin,
+  Youtube,
+  Twitter,
+  Facebook,
 } from "lucide-react";
 
 export const images = {
@@ -23,6 +29,17 @@ export const images = {
   logo,
 };
 
+export const contactInfo = [
+  { icon: Mail, label: "support@learnbright.com" },
+  { icon: Phone, label: "+1 (555) 123-4567" },
+  { icon: MapPin, label: "San Francisco, CA" },
+];
+
+export const socialIcons = [
+  { icon: Youtube, url: "https://www.youtube.com/yourchannel" },
+  { icon: Twitter, url: "https://twitter.com/yourprofile" },
+  { icon: Facebook, url: "https://facebook.com/yourpage" },
+];
 export const steps = [
   {
     icon: ClipboardList,
