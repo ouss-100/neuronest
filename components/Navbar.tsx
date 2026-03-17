@@ -1,11 +1,11 @@
 "use client";
 
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sun, Moon } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import ThemeToggle from "@/components/theme-toggle";
 import { images } from "@/assets/assets";
 import Image from "next/image";
 
@@ -19,13 +19,6 @@ const navLinks = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
-
-  const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
 
   return (
     <nav className="glass-nav sticky top-0 z-50">
@@ -73,40 +66,22 @@ export default function Navbar() {
           </Link>
 
           {/* Theme Toggle Button */}
-          <motion.button
-            onClick={toggleTheme}
-            className="ml-2 p-2 rounded-full border border-border hover:bg-muted transition-colors"
-            whileTap={{ rotate: 20 }}
-            whileHover={{ scale: 1.1 }}
-          >
-            {theme === "light" ? (
-              <Sun className="w-5 h-5 text-yellow-400" />
-            ) : (
-              <Moon className="w-5 h-5 text-blue-400" />
-            )}
-          </motion.button>
+          <ThemeToggle className="ml-2" />
         </div>
 
         {/* Mobile Toggle */}
         <div className="flex md:hidden items-center gap-2">
-          <motion.button
-            onClick={toggleTheme}
-            className="p-2 rounded-full border border-border hover:bg-muted transition-colors"
-            whileTap={{ rotate: 20 }}
-            whileHover={{ scale: 1.1 }}
-          >
-            {theme === "light" ? (
-              <Sun className="w-5 h-5 text-yellow-400" />
-            ) : (
-              <Moon className="w-5 h-5 text-blue-400" />
-            )}
-          </motion.button>
+          <ThemeToggle />
 
           <button
             className="p-2 rounded-xl hover:bg-muted transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
       </div>
@@ -127,7 +102,9 @@ export default function Navbar() {
                   href={link.to}
                   onClick={() => setMobileOpen(false)}
                   className={`font-heading font-semibold py-2 ${
-                    pathname === link.to ? "text-primary" : "text-muted-foreground"
+                    pathname === link.to
+                      ? "text-primary"
+                      : "text-muted-foreground"
                   }`}
                 >
                   {link.label}

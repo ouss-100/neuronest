@@ -1,83 +1,113 @@
 "use client";
 
-import { Shield } from "lucide-react";
 import { motion } from "framer-motion";
-import PageTransition from "@/components/PageTransition";
-import PageHero from "@/components/PageHero";
-import { assets, sections, ethicsPrinciples } from "@/assets/assets";
-import { fadeIn, slideInLeft, fadeInUpOnViewWithDelay } from "@/lib/animations";
+import {
+  Shield,
+  Lock,
+  Eye,
+  FileCheck,
+  UserCheck,
+  Server,
+  Heart,
+  AlertTriangle,
+} from "lucide-react";
 
-const PrivacyPage = () => (
-  <PageTransition>
+const fadeUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6 },
+};
+
+const principles = [
+  {
+    icon: Lock,
+    title: "Data Encryption",
+    desc: "All personal and assessment data is encrypted at rest (AES-256) and in transit (TLS 1.3). Your information is never exposed.",
+  },
+  {
+    icon: Eye,
+    title: "Transparency",
+    desc: "We clearly explain what data we collect, why we collect it, and how it's used. No hidden tracking, no surprises.",
+  },
+  {
+    icon: UserCheck,
+    title: "Parental Consent",
+    desc: "All child data requires explicit parental consent. Parents retain full control and can delete data at any time.",
+  },
+  {
+    icon: Server,
+    title: "Secure Infrastructure",
+    desc: "Our servers are hosted in SOC 2 Type II certified data centers with continuous monitoring and regular security audits.",
+  },
+  {
+    icon: FileCheck,
+    title: "HIPAA & COPPA Compliant",
+    desc: "We adhere to HIPAA for health-related data and COPPA for children's online privacy, meeting the highest regulatory standards.",
+  },
+  {
+    icon: Heart,
+    title: "Ethical AI",
+    desc: "Our AI models are regularly audited for bias. We ensure fair, equitable screening across all demographics and backgrounds.",
+  },
+];
+
+const commitments = [
+  "We never sell your data to third parties.",
+  "Assessment results are only shared with people you authorize.",
+  "AI models are trained on de-identified, diverse datasets.",
+  "You can request full data export or deletion at any time.",
+  "We conduct annual third-party security audits.",
+  "Our team includes child psychology and ethics advisors.",
+];
+
+const PrivacyEthics = () => (
+  <div>
     {/* Hero */}
-    <PageHero
-      title="Privacy & Ethics"
-      subtitle="How we protect your data and uphold ethical standards."
-      icon={<Shield className="w-8 h-8 text-primary-foreground" />}
-      gradient="cool"
-      backgroundImage={assets.heroPrivacy}
-    />
-
-    {/* Privacy Policy */}
-    <section className="py-16 bg-background">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <motion.h2
-          {...fadeIn()}
-          className="text-3xl font-heading font-bold text-center mb-10 text-foreground"
-        >
-          Privacy Policy
-        </motion.h2>
-
-        <div className="space-y-6">
-          {sections.map((s, i) => (
-            <motion.div
-              key={s.title}
-              {...slideInLeft(i)}
-              className="rounded-xl bg-card border border-border p-6 flex gap-4 hover:shadow-lg transition-shadow"
-            >
-              <div className="w-12 h-12 rounded-xl bg-sky flex items-center justify-center shrink-0">
-                <span className="text-sky-foreground">{s.icon}</span>
-              </div>
-
-              <div>
-                <h3 className="font-heading font-bold text-base mb-1 text-foreground">
-                  {s.title}
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {s.content}
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+    <section className="section-spacer">
+      <div className="container-narrow text-center">
+        <motion.div {...fadeUp}>
+          <div className="w-16 h-16 rounded-[20px] bg-primary/10 flex items-center justify-center mx-auto mb-6">
+            <Shield className="w-8 h-8 text-primary" />
+          </div>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold text-foreground leading-tight">
+            Privacy & Ethics
+          </h1>
+          <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
+            Your family's privacy is not just a feature — it's our foundation.
+            We believe every child's data deserves the highest protection and
+            every assessment must be ethically sound.
+          </p>
+        </motion.div>
       </div>
     </section>
 
-    {/* Ethics */}
-    <section className="py-16 bg-muted/50">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <motion.div {...fadeIn()} className="text-center mb-10">
-          <h2 className="text-3xl font-heading font-bold mb-4 text-foreground">
-            Our Ethical Framework
+    {/* Principles */}
+    <section className="pb-20">
+      <div className="container-narrow">
+        <motion.div {...fadeUp} className="text-center mb-16">
+          <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground">
+            How we protect your family
           </h2>
-
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            We are committed to the highest ethical standards in everything we
-            do.
+          <p className="mt-4 text-muted-foreground max-w-lg mx-auto">
+            Six pillars that guide every decision we make about your data.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {ethicsPrinciples.map((p, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {principles.map((p, i) => (
             <motion.div
               key={p.title}
-              {...fadeInUpOnViewWithDelay(i, 0.1)}
-              className="rounded-xl bg-mint/30 border border-mint p-6 hover:shadow-lg transition-shadow"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 + 0.2 }}
+              className="card-soft-hover"
             >
-              <h3 className="font-heading font-bold text-base mb-2 text-foreground">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4">
+                <p.icon className="w-6 h-6" />
+              </div>
+              <h3 className="font-heading font-bold text-foreground mb-2">
                 {p.title}
               </h3>
-
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {p.desc}
               </p>
@@ -87,25 +117,114 @@ const PrivacyPage = () => (
       </div>
     </section>
 
-    {/* Contact */}
-    <section className="py-16 bg-background">
-      <div className="container mx-auto px-4 max-w-4xl text-center">
-        <motion.div {...fadeInUpOnViewWithDelay(0)}>
-          <h2 className="text-2xl font-heading font-bold mb-4 text-foreground">
-            Questions About Your Data?
+    {/* Commitments */}
+    <section className="section-spacer bg-card">
+      <div className="container-narrow">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <motion.div {...fadeUp}>
+            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground mb-4">
+              Our commitments to you
+            </h2>
+            <p className="text-muted-foreground mb-8">
+              These are promises we make to every family that trusts us with
+              their child's information.
+            </p>
+            <ul className="space-y-4">
+              {commitments.map((c, i) => (
+                <motion.li
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 + 0.3 }}
+                  className="flex items-start gap-3"
+                >
+                  <div className="w-6 h-6 rounded-full bg-secondary/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Shield className="w-3.5 h-3.5 text-secondary" />
+                  </div>
+                  <span className="text-sm text-foreground">{c}</span>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <div className="card-soft !p-8 bg-primary/5 border-primary/10">
+              <AlertTriangle className="w-8 h-8 text-accent mb-4" />
+              <h3 className="font-heading font-bold text-foreground text-lg mb-3">
+                Important notice
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                LearnBright provides{" "}
+                <strong className="text-foreground">
+                  screening assessments only
+                </strong>
+                . Our AI-powered tools are designed to identify potential
+                indicators of learning disorders, but they are{" "}
+                <strong className="text-foreground">
+                  not a medical diagnosis
+                </strong>
+                .
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                We always recommend consulting with qualified healthcare
+                professionals for formal evaluation and diagnosis. Our platform
+                facilitates — never replaces — expert care.
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+
+    {/* Data Rights */}
+    <section className="section-spacer">
+      <div className="container-narrow text-center">
+        <motion.div {...fadeUp}>
+          <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground mb-4">
+            Your data rights
           </h2>
-
-          <p className="text-muted-foreground mb-2">
-            Contact our Data Protection Officer:
+          <p className="text-muted-foreground max-w-xl mx-auto mb-12">
+            You're always in control. Here's what you can do with your data at
+            any time.
           </p>
 
-          <p className="text-sm text-primary font-medium">
-            dpo@brightminds.org
-          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+            {[
+              {
+                title: "Access",
+                desc: "View all data we hold about you and your child.",
+              },
+              {
+                title: "Export",
+                desc: "Download a complete copy of your data in standard formats.",
+              },
+              {
+                title: "Delete",
+                desc: "Request permanent deletion of all your data.",
+              },
+            ].map((r, i) => (
+              <motion.div
+                key={r.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 + 0.2 }}
+                className="card-soft text-center"
+              >
+                <h3 className="font-heading font-bold text-primary text-lg mb-2">
+                  {r.title}
+                </h3>
+                <p className="text-sm text-muted-foreground">{r.desc}</p>
+              </motion.div>
+            ))}
+          </div>
         </motion.div>
       </div>
     </section>
-  </PageTransition>
+  </div>
 );
 
-export default PrivacyPage;
+export default PrivacyEthics;
