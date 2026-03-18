@@ -48,7 +48,7 @@ const ForgotPassword = () => (
               <input
                 className="input-soft !pl-11"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="Enter your email"
               />
             </div>
           </motion.div>

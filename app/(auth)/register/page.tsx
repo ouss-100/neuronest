@@ -3,11 +3,18 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Mail, Lock, ArrowRight, Stethoscope, Users } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  ArrowRight,
+  Stethoscope,
+  Users,
+  Star,
+  Phone,
+} from "lucide-react";
 import { useState } from "react";
 import { fadeUp } from "@/lib/animations";
 import { images } from "@/assets/assets";
-import { i } from "framer-motion/client";
 
 const roles = [
   {
@@ -26,14 +33,58 @@ const roles = [
 
 const Register = () => {
   const [selectedRole, setSelectedRole] = useState("parent");
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    // Doctor specific
+    phone: "",
+    specialty: "",
+    latitude: "",
+    longitude: "",
+    identityCard: null as File | null,
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, files } = e.target;
+    if (type === "file") {
+      setFormData((prev) => ({ ...prev, [name]: files?.[0] || null }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Prepare data based on role
+    const userData = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      password: formData.password,
+      role: selectedRole,
+      ...(selectedRole === "doctor" && {
+        phone: formData.phone || undefined,
+        specialty: formData.specialty,
+        identityCard: formData.identityCard,
+        latitude: formData.latitude || undefined,
+        longitude: formData.longitude || undefined,
+      }),
+    };
+
+    console.log("Submitting:", userData);
+    // Here you would send the data to your API
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-6">
+    <div className="min-h-screen flex items-center justify-center bg-background px-6 py-8">
       <motion.div
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
-        className="w-full max-w-md"
+        className="w-full max-w-2xl"
       >
         {/* Header */}
         <motion.div {...fadeUp()} className="text-center mb-8">
@@ -58,11 +109,11 @@ const Register = () => {
 
         {/* Form */}
         <motion.div {...fadeUp(1)} className="card-soft !p-8">
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Role selector */}
             <motion.div {...fadeUp(2)}>
               <label className="text-sm font-body font-medium text-foreground mb-2 block">
-                I am a...
+                Choose your account type
               </label>
               <div className="grid grid-cols-2 gap-3">
                 {roles.map((r) => (
@@ -77,7 +128,11 @@ const Register = () => {
                     }`}
                   >
                     <r.icon
-                      className={`w-5 h-5 mx-auto mb-1 ${selectedRole === r.value ? "text-primary" : "text-muted-foreground"}`}
+                      className={`w-5 h-5 mx-auto mb-1 ${
+                        selectedRole === r.value
+                          ? "text-primary"
+                          : "text-muted-foreground"
+                      }`}
                     />
                     <p className="text-sm font-display font-semibold text-foreground">
                       {r.label}
@@ -90,63 +145,265 @@ const Register = () => {
               </div>
             </motion.div>
 
-            {/* Name */}
-            <motion.div {...fadeUp(3)} className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  First name
-                </label>
-                <input className="input-soft" placeholder="Jane" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  Last name
-                </label>
-                <input className="input-soft" placeholder="Doe" />
-              </div>
-            </motion.div>
+            {/* Parent-specific fields */}
+            {selectedRole === "parent" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-4"
+              >
+                {/* First Name and Last Name in a grid */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">
+                      First Name
+                    </label>
+                    <input
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      className="input-soft w-full"
+                      placeholder="Enter your first name"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">
+                      Last Name
+                    </label>
+                    <input
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      className="input-soft w-full"
+                      placeholder="Enter your last name"
+                      required
+                    />
+                  </div>
+                </div>
 
-            {/* Email & Password */}
-            <motion.div {...fadeUp(4)} className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                Email
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  className="input-soft !pl-11"
-                  type="email"
-                  placeholder="you@example.com"
-                />
-              </div>
-            </motion.div>
+                {/* Email */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Email
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="input-soft !pl-11 w-full"
+                      placeholder="Enter your email"
+                      required
+                    />
+                  </div>
+                </div>
 
-            <motion.div {...fadeUp(5)} className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  className="input-soft !pl-11"
-                  type="password"
-                  placeholder="••••••••"
-                />
-              </div>
-            </motion.div>
+                {/* Password */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      name="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className="input-soft !pl-11 w-full"
+                      placeholder="••••••••"
+                      required
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
-            {/* Submit */}
+            {/* Doctor-specific fields with two-column layout */}
+            {selectedRole === "doctor" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Left Column */}
+                  <div className="space-y-4">
+                    {/* First Name */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">
+                        First Name
+                      </label>
+                      <input
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                        className="input-soft w-full"
+                        placeholder="Enter your first name"
+                        required
+                      />
+                    </div>
+
+                    {/* Email */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">
+                        Email
+                      </label>
+                      <div className="relative">
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <input
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          className="input-soft !pl-11 w-full"
+                          placeholder="Enter your email"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Phone Number */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">
+                        Phone Number
+                      </label>
+                      <div className="relative">
+                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <input
+                          name="phone"
+                          type="tel"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          className="input-soft !pl-11 w-full"
+                          placeholder="Enter your phone number"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column */}
+                  <div className="space-y-4">
+                    {/* Last Name */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">
+                        Last Name
+                      </label>
+                      <input
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                        className="input-soft w-full"
+                        placeholder="Enter your last name"
+                        required
+                      />
+                    </div>
+
+                    {/* Password */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">
+                        Password
+                      </label>
+                      <div className="relative">
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <input
+                          name="password"
+                          type="password"
+                          value={formData.password}
+                          onChange={handleInputChange}
+                          className="input-soft !pl-11 w-full"
+                          placeholder="••••••••"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Specialty */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">
+                        Specialty
+                      </label>
+                      <div className="relative">
+                        <Star className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <input
+                          name="specialty"
+                          value={formData.specialty}
+                          onChange={handleInputChange}
+                          className="input-soft !pl-11 w-full"
+                          placeholder="e.g., Pediatrician"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Identity Card Upload - Full Width at Bottom */}
+                <div className="mt-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">
+                      Upload Identity Card
+                    </label>
+                    <div className="flex justify-center rounded-lg border border-dashed border-gray-300 dark:border-gray-600 px-3 py-4">
+                      <div className="text-center">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="mx-auto size-8 text-gray-400"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            clipRule="evenodd"
+                            d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
+                          />
+                        </svg>
+                        <div className="mt-2 flex flex-col items-center text-sm text-gray-600 dark:text-gray-400">
+                          <label
+                            htmlFor="identityCard"
+                            className="relative cursor-pointer rounded-md bg-transparent font-semibold text-primary hover:text-primary/80"
+                          >
+                            <span>Choose file</span>
+                            <input
+                              id="identityCard"
+                              name="identityCard"
+                              type="file"
+                              accept="image/*,.pdf"
+                              onChange={handleInputChange}
+                              className="sr-only"
+                              required
+                            />
+                          </label>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            PNG, JPG, PDF (max 10MB)
+                          </p>
+                        </div>
+                        {formData.identityCard && (
+                          <p className="text-xs text-green-600 dark:text-green-400 mt-2 truncate max-w-[150px]">
+                            {formData.identityCard.name}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+            {/* Submit Button */}
             <motion.button
-              {...fadeUp(6)}
+              {...fadeUp(7)}
               type="submit"
-              className="btn-accent w-full flex items-center justify-center gap-2"
+              className="btn-accent w-full flex items-center justify-center gap-2 mt-6"
             >
               Get Started <ArrowRight className="w-4 h-4" />
             </motion.button>
           </form>
 
           <motion.p
-            {...fadeUp(7)}
+            {...fadeUp(8)}
             className="text-center text-sm text-muted-foreground mt-6"
           >
             Already have an account?{" "}

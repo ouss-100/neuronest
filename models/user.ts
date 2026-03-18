@@ -1,28 +1,27 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
-import bcrypt from "bcryptjs";
+import mongoose, { Schema, Model, Document } from "mongoose";
 
+/* =======================
+   ENUM
+======================= */
 export enum UserRole {
   ADMIN = "admin",
   PATIENT = "patient",
   DOCTOR = "doctor",
+  PARENT = "parent",
 }
 
+/* =======================
+   BASE USER
+======================= */
 export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
   role: UserRole;
-  phone?: string;
-
-  location?: string;
-  identityCard?: string;
-
   isVerified: boolean;
-
-  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const UserSchema: Schema<IUser> = new Schema(
+const userSchema = new Schema<IUser>(
   {
     name: {
       type: String,
@@ -35,7 +34,6 @@ const UserSchema: Schema<IUser> = new Schema(
       required: true,
       unique: true,
       lowercase: true,
-      trim: true,
     },
 
     password: {
@@ -46,28 +44,7 @@ const UserSchema: Schema<IUser> = new Schema(
     role: {
       type: String,
       enum: Object.values(UserRole),
-      default: UserRole.PATIENT,
-    },
-
-    phone: {
-      type: String,
-      trim: true,
-    },
-
-    location: {
-      type: String,
-      required: function (this: IUser) {
-        return this.role === UserRole.DOCTOR;
-      },
-      trim: true,
-    },
-
-    identityCard: {
-      type: String,
-      required: function (this: IUser) {
-        return this.role === UserRole.DOCTOR;
-      },
-      trim: true,
+      required: true,
     },
 
     isVerified: {
@@ -75,19 +52,106 @@ const UserSchema: Schema<IUser> = new Schema(
       default: false,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    discriminatorKey: "role",
+  },
 );
 
-UserSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
+export const User: Model<IUser> =
+  mongoose.models.User || mongoose.model<IUser>("User", userSchema);
+
+/* =======================
+   DOCTOR
+======================= */
+export interface IDoctor extends IUser {
+  phone: string;
+  specialty: string;
+  rating: number;
+  reviews: number;
+  latitude: number;
+  longitude: number;
+  identityCard: string;
+}
+
+const doctorSchema = new Schema<IDoctor>({
+  phone: {
+    type: String,
+    required: true,
+  },
+
+  specialty: {
+    type: String,
+    required: true,
+  },
+
+  rating: {
+    type: Number,
+    default: 0,
+  },
+
+  reviews: {
+    type: Number,
+    default: 0,
+  },
+
+  latitude: {
+    type: Number,
+    required: true,
+  },
+
+  longitude: {
+    type: Number,
+    required: true,
+  },
+
+  identityCard: {
+    type: String,
+    required: true,
+  },
 });
 
-UserSchema.methods.comparePassword = async function (candidatePassword: string) {
-  return bcrypt.compare(candidatePassword, this.password);
-};
+export const Doctor: Model<IDoctor> =
+  (mongoose.models.doctor as Model<IDoctor>) ||
+  User.discriminator<IDoctor>("doctor", doctorSchema);
 
-const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
-export default User;
+/* =======================
+   PARENT
+======================= */
+export interface IParent extends IUser {
+  children: number;
+}
+
+const parentSchema = new Schema<IParent>({
+  children: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
+});
+
+export const Parent: Model<IParent> =
+  (mongoose.models.parent as Model<IParent>) ||
+  User.discriminator<IParent>("parent", parentSchema);
+
+/* =======================
+   PATIENT (OPTIONAL)
+======================= */
+export interface IPatient extends IUser {
+  age?: number;
+  gender?: string;
+}
+
+const patientSchema = new Schema<IPatient>({
+  age: {
+    type: Number,
+  },
+  gender: {
+    type: String,
+    enum: ["male", "female"],
+  },
+});
+
+export const Patient: Model<IPatient> =
+  (mongoose.models.patient as Model<IPatient>) ||
+  User.discriminator<IPatient>("patient", patientSchema);
