@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans, Geist } from "next/font/google";
 import ThemeProviderWrapper from "@/components/ThemeProviderWrapper";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
 import { cn } from "@/lib/utils";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});

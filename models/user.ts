@@ -14,7 +14,8 @@ export enum UserRole {
    BASE USER
 ======================= */
 export interface IUser extends Document {
-  name: string;
+  firstname: string;
+  lastname: string;
   email: string;
   password: string;
   role: UserRole;
@@ -23,12 +24,16 @@ export interface IUser extends Document {
 
 const userSchema = new Schema<IUser>(
   {
-    name: {
+    firstname: {
       type: String,
       required: true,
       trim: true,
     },
-
+    lastname: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     email: {
       type: String,
       required: true,

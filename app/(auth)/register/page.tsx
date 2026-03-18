@@ -31,8 +31,15 @@ const roles = [
   },
 ];
 
+import dynamic from "next/dynamic";
+
+const MapPicker = dynamic(() => import("@/components/MapPicker"), {
+  ssr: false,
+});
+
 const Register = () => {
   const [selectedRole, setSelectedRole] = useState("parent");
+  const [mapPosition, setMapPosition] = useState<[number, number] | null>(null);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -390,8 +397,59 @@ const Register = () => {
                     </div>
                   </div>
                 </div>
+                {/* Map Location Picker */}
+                <div className="mt-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">
+                      Select Your Location{" "}
+                    </label>
+                    <MapPicker
+                      position={mapPosition}
+                      onSelect={(lat, lng) => {
+                        setMapPosition([lat, lng]);
+                        setFormData((prev) => ({
+                          ...prev,
+                          latitude: lat.toString(),
+                          longitude: lng.toString(),
+                        }));
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!navigator.geolocation) {
+                          alert("Geolocation is not supported");
+                          return;
+                        }
+
+                        navigator.geolocation.getCurrentPosition(
+                          (pos) => {
+                            const lat = pos.coords.latitude;
+                            const lng = pos.coords.longitude;
+
+                            setMapPosition([lat, lng]);
+
+                            setFormData((prev) => ({
+                              ...prev,
+                              latitude: lat.toString(),
+                              longitude: lng.toString(),
+                            }));
+                          },
+                          (err) => {
+                            alert("Failed to get location");
+                            console.error(err);
+                          },
+                        );
+                      }}
+                      className="text-sm text-primary font-semibold hover:underline"
+                    >
+                      Use my current location
+                    </button>
+                  </div>
+                </div>
               </motion.div>
             )}
+
             {/* Submit Button */}
             <motion.button
               {...fadeUp(7)}
