@@ -1,88 +1,147 @@
-import bcrypt from "bcryptjs";
+"use server";
+
+import connectDB from "@/lib/mongodb";
 import { User, Doctor, Parent } from "@/models/user";
+import bcrypt from "bcryptjs";
+import { RegisterInput, RegisterResponse } from "@/types/user";
+import { serializeUser } from "@/lib/serialize";
 
-// Function to auto-detect doctor location using IP/geolocation (mocked here for simplicity)
-// In production, you could use a real geolocation service
-async function detectLocation(): Promise<{
-  latitude: number;
-  longitude: number;
-}> {
-  // Mock: center of some city, replace with IP-based detection if needed
-  return { latitude: 36.8065, longitude: 10.1815 }; // Tunis coordinates
-}
-
-// ------------------------
-// REGISTER USER FUNCTION
-// ------------------------
-export interface RegisterData {
-  firstname: string;
-  lastname: string;
-  email: string;
-  password: string;
-  role: "parent" | "doctor";
-  children?: number;
-  phone?: string;
-  specialty?: string;
-  identityCard?: File | string;
-}
-
-export async function registerUser(data: RegisterData) {
+/* =======================
+   REGISTER USER
+======================= */
+export const registerUser = async (
+  data: RegisterInput,
+): Promise<RegisterResponse> => {
   try {
-    // Check if email already exists
-    const existingUser = await User.findOne({ email: data.email });
-    if (existingUser) {
-      throw new Error("Email already registered");
+    await connectDB();
+
+    /* =======================
+       VALIDATION (COMMON)
+    ======================= */
+    if (
+      !data.firstname ||
+      !data.lastname ||
+      !data.email ||
+      !data.password ||
+      !data.role
+    ) {
+      return {
+        success: false,
+        message: "All fields are required",
+      };
     }
 
-    // Hash password
+    /* =======================
+       EMAIL FORMAT
+    ======================= */
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+      return {
+        success: false,
+        message: "Invalid email format",
+      };
+    }
+
+    /* =======================
+       PASSWORD LENGTH
+    ======================= */
+    if (data.password.length < 6) {
+      return {
+        success: false,
+        message: "Password must be at least 6 characters",
+      };
+    }
+
+    /* =======================
+       CHECK EXISTING USER
+    ======================= */
+    const existingUser = await User.findOne({ email: data.email });
+
+    if (existingUser) {
+      return {
+        success: false,
+        message: "Email already exists",
+      };
+    }
+
+    /* =======================
+       HASH PASSWORD
+    ======================= */
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    // Create Parent
-    if (data.role === "parent") {
-      const parent = new Parent({
-        firstname: data.firstname,
-        lastname: data.lastname,
-        email: data.email.toLowerCase(),
-        password: hashedPassword,
-        role: "parent",
-        children: data.children || 0,
-      });
-      await parent.save();
-      return { success: true, user: parent };
-    }
+    /* =======================
+       BASE USER
+    ======================= */
+    const baseUser = {
+      firstname: data.firstname.trim(),
+      lastname: data.lastname.trim(),
+      email: data.email.toLowerCase().trim(),
+      password: hashedPassword,
+      role: data.role,
+    };
 
-    // Create Doctor
+    /* =======================
+       DOCTOR VALIDATION
+    ======================= */
     if (data.role === "doctor") {
-      if (!data.phone || !data.specialty || !data.identityCard) {
-        throw new Error(
-          "Doctor must provide phone, specialty, and identity card",
-        );
+      if (
+        !data.phone ||
+        !data.specialty ||
+        !data.latitude ||
+        !data.longitude ||
+        !data.identityCard
+      ) {
+        return {
+          success: false,
+          message: "All doctor fields are required",
+        };
       }
 
-      // Auto-detect location
-      const { latitude, longitude } = await detectLocation();
+      /* =======================
+         FILE (TEMPORARY)
+      ======================= */
+      const identityCardPath = `/uploads/${Date.now()}-${data.identityCard.name}`;
 
-      const doctor = new Doctor({
-        firstname: data.firstname,
-        lastname: data.lastname,
-        email: data.email.toLowerCase(),
-        password: hashedPassword,
-        role: "doctor",
-        phone: data.phone,
-        specialty: data.specialty,
-        identityCard:
-          typeof data.identityCard === "string"
-            ? data.identityCard
-            : data.identityCard?.name,
-        latitude,
-        longitude,
+      const doctor = await Doctor.create({
+        ...baseUser,
+        phone: data.phone.trim(),
+        specialty: data.specialty.trim(),
+        latitude: data.latitude,
+        longitude: data.longitude,
+        identityCard: identityCardPath,
       });
-      await doctor.save();
-      return { success: true, user: doctor };
+
+      return {
+        success: true,
+        user: serializeUser(doctor),
+      };
     }
 
-    throw new Error("Invalid role");
-  } catch (error: any) {
-    return { success: false, error: error.message || "Registration failed" };
+    /* =======================
+       PARENT VALIDATION
+    ======================= */
+    if (data.role === "parent") {
+      const parent = await Parent.create({
+        ...baseUser,
+        children: 0,
+      });
+
+      return {
+        success: true,
+        user: serializeUser(parent),
+      };
+    }
+
+    return {
+      success: false,
+      message: "Invalid role",
+    };
+  } catch (error) {
+    console.error("REGISTER ERROR:", error);
+
+    return {
+      success: false,
+      message: "Server error, please try again",
+    };
   }
-}
+};

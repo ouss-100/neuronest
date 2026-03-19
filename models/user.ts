@@ -5,7 +5,6 @@ import mongoose, { Schema, Model, Document } from "mongoose";
 ======================= */
 export enum UserRole {
   ADMIN = "admin",
-  PATIENT = "patient",
   DOCTOR = "doctor",
   PARENT = "parent",
 }
@@ -139,24 +138,3 @@ export const Parent: Model<IParent> =
   (mongoose.models.parent as Model<IParent>) ||
   User.discriminator<IParent>("parent", parentSchema);
 
-/* =======================
-   PATIENT (OPTIONAL)
-======================= */
-export interface IPatient extends IUser {
-  age?: number;
-  gender?: string;
-}
-
-const patientSchema = new Schema<IPatient>({
-  age: {
-    type: Number,
-  },
-  gender: {
-    type: String,
-    enum: ["male", "female"],
-  },
-});
-
-export const Patient: Model<IPatient> =
-  (mongoose.models.patient as Model<IPatient>) ||
-  User.discriminator<IPatient>("patient", patientSchema);

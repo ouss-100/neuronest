@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { registerUser } from "@/server/userActions";
 import { motion } from "framer-motion";
 import {
   Mail,
@@ -40,6 +41,8 @@ const MapPicker = dynamic(() => import("@/components/MapPicker"), {
 const Register = () => {
   const [selectedRole, setSelectedRole] = useState("parent");
   const [mapPosition, setMapPosition] = useState<[number, number] | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -65,24 +68,39 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Prepare data based on role
-    const userData = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      password: formData.password,
-      role: selectedRole,
-      ...(selectedRole === "doctor" && {
-        phone: formData.phone || undefined,
-        specialty: formData.specialty,
-        identityCard: formData.identityCard,
-        latitude: formData.latitude || undefined,
-        longitude: formData.longitude || undefined,
-      }),
-    };
+    setErrorMessage("");
+    setSuccessMessage("");
 
-    console.log("Submitting:", userData);
-    // Here you would send the data to your API
+    let res;
+
+    if (selectedRole === "doctor") {
+      res = await registerUser({
+        firstname: formData.firstName,
+        lastname: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        role: "doctor",
+        phone: formData.phone,
+        specialty: formData.specialty,
+        latitude: Number(formData.latitude),
+        longitude: Number(formData.longitude),
+        identityCard: formData.identityCard!,
+      });
+    } else {
+      res = await registerUser({
+        firstname: formData.firstName,
+        lastname: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        role: "parent",
+      });
+    }
+
+    if (!res.success) {
+      setErrorMessage(res.message || "Something went wrong");
+    } else {
+      setSuccessMessage("Account created successfully 🎉");
+    }
   };
 
   return (
@@ -443,7 +461,7 @@ const Register = () => {
                       }}
                       className="text-sm text-primary font-semibold hover:underline"
                     >
-                      Use my current location
+                      Get my current location
                     </button>
                   </div>
                 </div>
@@ -458,6 +476,17 @@ const Register = () => {
             >
               Get Started <ArrowRight className="w-4 h-4" />
             </motion.button>
+            {errorMessage && (
+              <div className="text-red-500 text-sm font-medium text-center">
+                {errorMessage}
+              </div>
+            )}
+
+            {successMessage && (
+              <div className="text-green-500 text-sm font-medium text-center">
+                {successMessage}
+              </div>
+            )}
           </form>
 
           <motion.p
