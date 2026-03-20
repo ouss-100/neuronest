@@ -8,7 +8,6 @@ import { fadeUp } from "@/lib/animations";
 
 const About = () => (
   <div>
-    {/* Hero Section */}
     <section className="section-spacer">
       <div className="container-narrow grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <motion.div {...fadeUp()}>
@@ -39,7 +38,6 @@ const About = () => (
       </div>
     </section>
 
-    {/* Learning Disorders */}
     <section className="section-spacer bg-card">
       <div className="container-narrow">
         <motion.div {...fadeUp()} className="text-center mb-16">
@@ -73,7 +71,6 @@ const About = () => (
       </div>
     </section>
 
-    {/* Mission */}
     <section className="py-20">
       <div className="container mx-auto px-4 max-w-3xl text-center">
         <motion.div
@@ -113,7 +110,6 @@ const About = () => (
       </div>
     </section>
 
-    {/* How AI Works */}
     <section className="py-20 bg-card">
       <div className="container mx-auto px-4 max-w-3xl">
         <motion.div

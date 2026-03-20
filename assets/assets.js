@@ -20,6 +20,12 @@ import {
   Youtube,
   Twitter,
   Facebook,
+  Lock,
+  FileCheck,
+  UserCheck,
+  Server,
+  Heart,
+  Globe,
 } from "lucide-react";
 
 export const images = {
@@ -319,4 +325,97 @@ export const aiSteps = [
   "Our AI model analyzes response patterns, timing, and accuracy against established developmental benchmarks.",
   "Results are presented as clear visual reports, highlighting strengths and areas for further evaluation.",
   "A qualified professional reviews flagged assessments and provides personalized recommendations.",
+];
+
+export const principles = [
+  {
+    icon: Lock,
+    title: "Data Encryption",
+    desc: "All personal and assessment data is encrypted at rest (AES-256) and in transit (TLS 1.3). Your information is never exposed.",
+  },
+  {
+    icon: Eye,
+    title: "Transparency",
+    desc: "We clearly explain what data we collect, why we collect it, and how it's used. No hidden tracking, no surprises.",
+  },
+  {
+    icon: UserCheck,
+    title: "Parental Consent",
+    desc: "All child data requires explicit parental consent. Parents retain full control and can delete data at any time.",
+  },
+  {
+    icon: Server,
+    title: "Secure Infrastructure",
+    desc: "Our servers are hosted in SOC 2 Type II certified data centers with continuous monitoring and regular security audits.",
+  },
+  {
+    icon: FileCheck,
+    title: "HIPAA & COPPA Compliant",
+    desc: "We adhere to HIPAA for health-related data and COPPA for children's online privacy, meeting the highest regulatory standards.",
+  },
+  {
+    icon: Heart,
+    title: "Ethical AI",
+    desc: "Our AI models are regularly audited for bias. We ensure fair, equitable screening across all demographics and backgrounds.",
+  },
+];
+
+export const commitments = [
+  "We never sell your data to third parties.",
+  "Assessment results are only shared with people you authorize.",
+  "AI models are trained on de-identified, diverse datasets.",
+  "You can request full data export or deletion at any time.",
+  "We conduct annual third-party security audits.",
+  "Our team includes child psychology and ethics advisors.",
+];
+
+export const stats = [
+  { value: "12,000+", label: "Children Assessed", icon: Users },
+  { value: "94%", label: "Parent Satisfaction", icon: Heart },
+  { value: "3,500+", label: "Early Detections", icon: Brain },
+  { value: "28", label: "Countries Reached", icon: Globe },
+];
+
+export const milestones = [
+  {
+    year: "2022",
+    title: "Platform Launch",
+    desc: "LearnBright launched with AI-powered dyslexia screening for parents.",
+  },
+  {
+    year: "2023",
+    title: "Doctor Network",
+    desc: "Partnered with 200+ certified learning disorder specialists worldwide.",
+  },
+  {
+    year: "2024",
+    title: "ADHD & Dyscalculia",
+    desc: "Expanded screening to cover ADHD, dyscalculia, and auditory processing.",
+  },
+  {
+    year: "2025",
+    title: "10K Milestone",
+    desc: "Surpassed 10,000 children screened with a 94% satisfaction rate.",
+  },
+];
+
+export const stories = [
+  {
+    name: "Emma's Story",
+    age: "Age 7",
+    text: "Emma's parents noticed she struggled with reading. After a LearnBright assessment, she was identified with dyslexia early enough to get tailored support. Today, she reads at grade level.",
+    outcome: "Reading at grade level",
+  },
+  {
+    name: "Lucas's Story",
+    age: "Age 9",
+    text: "Lucas was misunderstood as 'lazy' at school. LearnBright's screening flagged ADHD markers, leading to a proper evaluation and the right classroom strategies.",
+    outcome: "Thriving in school",
+  },
+  {
+    name: "Ava's Story",
+    age: "Age 6",
+    text: "Ava's teacher recommended a screening. LearnBright identified dyscalculia early, and her parents connected with a specialist who helped her build confidence in math.",
+    outcome: "Confident in math",
+  },
 ];

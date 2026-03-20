@@ -3,76 +3,17 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
-  Users,
-  Brain,
-  Globe,
   Heart,
   TrendingUp,
   Award,
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
-
-const fadeUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6 },
-};
-
-const stats = [
-  { value: "12,000+", label: "Children Assessed", icon: Users },
-  { value: "94%", label: "Parent Satisfaction", icon: Heart },
-  { value: "3,500+", label: "Early Detections", icon: Brain },
-  { value: "28", label: "Countries Reached", icon: Globe },
-];
-
-const milestones = [
-  {
-    year: "2022",
-    title: "Platform Launch",
-    desc: "LearnBright launched with AI-powered dyslexia screening for parents.",
-  },
-  {
-    year: "2023",
-    title: "Doctor Network",
-    desc: "Partnered with 200+ certified learning disorder specialists worldwide.",
-  },
-  {
-    year: "2024",
-    title: "ADHD & Dyscalculia",
-    desc: "Expanded screening to cover ADHD, dyscalculia, and auditory processing.",
-  },
-  {
-    year: "2025",
-    title: "10K Milestone",
-    desc: "Surpassed 10,000 children screened with a 94% satisfaction rate.",
-  },
-];
-
-const stories = [
-  {
-    name: "Emma's Story",
-    age: "Age 7",
-    text: "Emma's parents noticed she struggled with reading. After a LearnBright assessment, she was identified with dyslexia early enough to get tailored support. Today, she reads at grade level.",
-    outcome: "Reading at grade level",
-  },
-  {
-    name: "Lucas's Story",
-    age: "Age 9",
-    text: "Lucas was misunderstood as 'lazy' at school. LearnBright's screening flagged ADHD markers, leading to a proper evaluation and the right classroom strategies.",
-    outcome: "Thriving in school",
-  },
-  {
-    name: "Ava's Story",
-    age: "Age 6",
-    text: "Ava's teacher recommended a screening. LearnBright identified dyscalculia early, and her parents connected with a specialist who helped her build confidence in math.",
-    outcome: "Confident in math",
-  },
-];
+import { milestones, stats, stories } from "@/assets/assets";
+import { fadeUp } from "@/lib/animations";
 
 const OurImpact = () => (
   <div>
-    {/* Hero */}
     <section className="section-spacer">
       <div className="container-narrow text-center">
         <motion.div {...fadeUp}>
@@ -93,7 +34,6 @@ const OurImpact = () => (
       </div>
     </section>
 
-    {/* Stats */}
     <section className="pb-20">
       <div className="container-narrow">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
@@ -118,7 +58,6 @@ const OurImpact = () => (
       </div>
     </section>
 
-    {/* Timeline */}
     <section className="section-spacer bg-card">
       <div className="container-narrow">
         <motion.div {...fadeUp} className="text-center mb-16">
@@ -139,7 +78,6 @@ const OurImpact = () => (
               transition={{ delay: i * 0.15 + 0.2 }}
               className="flex gap-6 relative"
             >
-              {/* Line */}
               <div className="flex flex-col items-center">
                 <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-xs shrink-0 z-10">
                   {m.year.slice(2)}
@@ -161,7 +99,6 @@ const OurImpact = () => (
       </div>
     </section>
 
-    {/* Stories */}
     <section className="section-spacer">
       <div className="container-narrow">
         <motion.div {...fadeUp} className="text-center mb-16">
@@ -206,7 +143,6 @@ const OurImpact = () => (
       </div>
     </section>
 
-    {/* CTA */}
     <section className="section-spacer bg-card">
       <div className="container-narrow text-center">
         <motion.div {...fadeUp}>

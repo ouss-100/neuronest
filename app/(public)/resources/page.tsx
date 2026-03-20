@@ -9,7 +9,6 @@ const Resources = () => (
   <div>
     <section className="section-spacer">
       <div className="container-narrow">
-        {/* Header */}
         <motion.div {...fadeUp()} className="text-center mb-16">
           <h1 className="text-4xl lg:text-5xl font-heading font-bold text-foreground">
             Resources & Guides
@@ -20,7 +19,6 @@ const Resources = () => (
           </p>
         </motion.div>
 
-        {/* Categories */}
         <div className="flex flex-wrap gap-3 justify-center mb-12">
           {["All", "Guides", "Articles", "Tips"].map((cat) => (
             <button
@@ -36,12 +34,11 @@ const Resources = () => (
           ))}
         </div>
 
-        {/* Articles Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {articles.map((a, i) => (
             <motion.article
               key={a.title}
-              {...fadeUp(i)} // Scroll-triggered staggered animation
+              {...fadeUp(i)}
               className="card-soft-hover cursor-pointer group"
             >
               <div className="flex items-center gap-2 mb-3">

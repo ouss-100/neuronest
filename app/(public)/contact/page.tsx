@@ -6,7 +6,6 @@ import { insertContact } from "@/server/contactActions";
 import { useState } from "react";
 import { ContactFormData, Role } from "@/types/contact";
 import { faqs, contactInfo, socialIcons } from "@/assets/assets";
-
 import { fadeUp } from "@/lib/animations";
 
 const Contact = () => {
@@ -64,10 +63,8 @@ const Contact = () => {
 
   return (
     <div>
-      {/* Contact Section */}
       <section className="section-spacer">
         <div className="container-narrow">
-          {/* Header */}
           <motion.div {...fadeUp()} className="text-center mb-5">
             <h1 className="text-4xl lg:text-5xl font-heading font-bold text-foreground">
               Get in Touch
@@ -78,7 +75,6 @@ const Contact = () => {
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-            {/* Contact Form */}
             <motion.div {...fadeUp()} className="card-soft p-5">
               <h2 className="font-heading font-bold text-xl text-foreground mb-5">
                 Send us a message
@@ -127,7 +123,7 @@ const Contact = () => {
                   <option>Other</option>
                 </select>
                 <textarea
-                  className="input-soft min-h-[140px] resize-none"
+                  className="input-soft min-h-35 resize-none"
                   placeholder="How can we help?"
                   name="message"
                   value={formData.message}
@@ -147,7 +143,6 @@ const Contact = () => {
               </form>
             </motion.div>
 
-            {/* Contact Info */}
             <motion.div
               {...fadeUp()}
               className="flex flex-col justify-between py-8 lg:py-12"
@@ -198,7 +193,6 @@ const Contact = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
       <section className="py-16">
         <div className="container mx-auto px-4 max-w-3xl">
           <motion.h2
@@ -210,7 +204,7 @@ const Contact = () => {
 
           <div className="space-y-2">
             {faqs.map((faq, i) => (
-              <div key={i} className="card-soft !p-0 overflow-hidden">
+              <div key={i} className="card-soft p-0! overflow-hidden">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex items-center justify-between p-4 text-left"

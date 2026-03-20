@@ -9,7 +9,6 @@ import { fadeUp, scaleFadeIn } from "@/lib/animations";
 
 const Home = () => (
   <div>
-    {/* Hero Section */}
     <section className="relative min-h-[85vh] flex items-center px-6 overflow-hidden">
       <div className="container-narrow grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <motion.div {...fadeUp()}>
@@ -57,7 +56,6 @@ const Home = () => (
       </div>
     </section>
 
-    {/* Steps Section */}
     <section className="section-spacer bg-card">
       <div className="container-narrow">
         <motion.div {...fadeUp()} className="text-center mb-16">
@@ -71,12 +69,20 @@ const Home = () => (
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {steps.map((step, i) => (
-            <motion.div key={i} {...fadeUp(i)} className="card-soft-hover text-center p-6 rounded-2xl">
+            <motion.div
+              key={i}
+              {...fadeUp(i)}
+              className="card-soft-hover text-center p-6 rounded-2xl"
+            >
               <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex flex-col items-center justify-center mx-auto mb-2">
                 <step.icon className="w-6 h-6 mb-1" />
               </div>
-              <span className="text-xs font-semibold text-primary">Step {i + 1}</span>
-              <h3 className="font-heading font-bold text-foreground mb-2">{step.title}</h3>
+              <span className="text-xs font-semibold text-primary">
+                Step {i + 1}
+              </span>
+              <h3 className="font-heading font-bold text-foreground mb-2">
+                {step.title}
+              </h3>
               <p className="text-sm text-muted-foreground">{step.desc}</p>
             </motion.div>
           ))}
@@ -84,7 +90,6 @@ const Home = () => (
       </div>
     </section>
 
-    {/* Features Section */}
     <section className="section-spacer">
       <div className="container-narrow">
         <motion.div {...fadeUp()} className="text-center mb-16">
@@ -99,12 +104,18 @@ const Home = () => (
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {features.map((f, i) => (
-            <motion.div key={f.title} {...fadeUp(i)} className="card-soft-hover flex gap-5">
+            <motion.div
+              key={f.title}
+              {...fadeUp(i)}
+              className="card-soft-hover flex gap-5"
+            >
               <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                 <f.icon className="w-7 h-7" />
               </div>
               <div>
-                <h3 className="font-heading font-bold text-foreground mb-1">{f.title}</h3>
+                <h3 className="font-heading font-bold text-foreground mb-1">
+                  {f.title}
+                </h3>
                 <p className="text-sm text-muted-foreground">{f.desc}</p>
               </div>
             </motion.div>
@@ -113,7 +124,6 @@ const Home = () => (
       </div>
     </section>
 
-    {/* Call to Action Section */}
     <section className="section-spacer">
       <div className="container-narrow text-center">
         <motion.div {...fadeUp()}>

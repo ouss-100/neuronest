@@ -1,68 +1,12 @@
 "use client";
 
+import { commitments, principles } from "@/assets/assets";
+import { fadeUp } from "@/lib/animations";
 import { motion } from "framer-motion";
-import {
-  Shield,
-  Lock,
-  Eye,
-  FileCheck,
-  UserCheck,
-  Server,
-  Heart,
-  AlertTriangle,
-} from "lucide-react";
-
-const fadeUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6 },
-};
-
-const principles = [
-  {
-    icon: Lock,
-    title: "Data Encryption",
-    desc: "All personal and assessment data is encrypted at rest (AES-256) and in transit (TLS 1.3). Your information is never exposed.",
-  },
-  {
-    icon: Eye,
-    title: "Transparency",
-    desc: "We clearly explain what data we collect, why we collect it, and how it's used. No hidden tracking, no surprises.",
-  },
-  {
-    icon: UserCheck,
-    title: "Parental Consent",
-    desc: "All child data requires explicit parental consent. Parents retain full control and can delete data at any time.",
-  },
-  {
-    icon: Server,
-    title: "Secure Infrastructure",
-    desc: "Our servers are hosted in SOC 2 Type II certified data centers with continuous monitoring and regular security audits.",
-  },
-  {
-    icon: FileCheck,
-    title: "HIPAA & COPPA Compliant",
-    desc: "We adhere to HIPAA for health-related data and COPPA for children's online privacy, meeting the highest regulatory standards.",
-  },
-  {
-    icon: Heart,
-    title: "Ethical AI",
-    desc: "Our AI models are regularly audited for bias. We ensure fair, equitable screening across all demographics and backgrounds.",
-  },
-];
-
-const commitments = [
-  "We never sell your data to third parties.",
-  "Assessment results are only shared with people you authorize.",
-  "AI models are trained on de-identified, diverse datasets.",
-  "You can request full data export or deletion at any time.",
-  "We conduct annual third-party security audits.",
-  "Our team includes child psychology and ethics advisors.",
-];
+import { Shield, AlertTriangle } from "lucide-react";
 
 const PrivacyEthics = () => (
   <div>
-    {/* Hero */}
     <section className="section-spacer">
       <div className="container-narrow text-center">
         <motion.div {...fadeUp}>
@@ -81,7 +25,6 @@ const PrivacyEthics = () => (
       </div>
     </section>
 
-    {/* Principles */}
     <section className="pb-20">
       <div className="container-narrow">
         <motion.div {...fadeUp} className="text-center mb-16">
@@ -117,7 +60,6 @@ const PrivacyEthics = () => (
       </div>
     </section>
 
-    {/* Commitments */}
     <section className="section-spacer bg-card">
       <div className="container-narrow">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -152,7 +94,7 @@ const PrivacyEthics = () => (
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <div className="card-soft !p-8 bg-primary/5 border-primary/10">
+            <div className="card-soft p-8! bg-primary/5 border-primary/10">
               <AlertTriangle className="w-8 h-8 text-accent mb-4" />
               <h3 className="font-heading font-bold text-foreground text-lg mb-3">
                 Important notice
@@ -180,7 +122,6 @@ const PrivacyEthics = () => (
       </div>
     </section>
 
-    {/* Data Rights */}
     <section className="section-spacer">
       <div className="container-narrow text-center">
         <motion.div {...fadeUp}>

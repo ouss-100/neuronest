@@ -19,6 +19,10 @@ export interface IUser extends Document {
   password: string;
   role: UserRole;
   isVerified: boolean;
+  otp: string;
+  otpExpires: Date | null;
+  resetToken?: string;
+  resetTokenExpires?: Date | null;
 }
 
 const userSchema = new Schema<IUser>(
@@ -54,6 +58,13 @@ const userSchema = new Schema<IUser>(
     isVerified: {
       type: Boolean,
       default: false,
+    },
+    otp: {
+      type: String,
+    },
+
+    otpExpires: {
+      type: Date,
     },
   },
   {
@@ -137,4 +148,3 @@ const parentSchema = new Schema<IParent>({
 export const Parent: Model<IParent> =
   (mongoose.models.parent as Model<IParent>) ||
   User.discriminator<IParent>("parent", parentSchema);
-

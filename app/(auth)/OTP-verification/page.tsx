@@ -3,13 +3,20 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams, useRouter } from "next/navigation";
+import { verifyOTP, resendOTP } from "@/server/userActions";
 import { motion } from "framer-motion";
-import { ShieldCheck, ArrowRight, RotateCcw } from "lucide-react";
+import { ArrowRight, RotateCcw } from "lucide-react";
 import { images } from "@/assets/assets";
 
 const OTPVerification = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
+
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [message, setMessage] = useState("");
 
   const handleChange = (index: number, value: string) => {
     if (value.length > 1) return;
@@ -17,7 +24,6 @@ const OTPVerification = () => {
     newOtp[index] = value;
     setOtp(newOtp);
 
-    // Auto-focus next input
     if (value && index < 5) {
       const next = document.getElementById(`otp-${index + 1}`);
       next?.focus();
@@ -31,10 +37,46 @@ const OTPVerification = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email) return;
+
+    const code = otp.join("");
     setIsVerifying(true);
-    setTimeout(() => setIsVerifying(false), 2000);
+    setMessage("");
+
+    try {
+      const res = await verifyOTP(email, code);
+
+      if (res.success) {
+        setMessage("Email verified successfully!");
+        setTimeout(() => router.push("/login"), 1000);
+      } else {
+        setMessage(res.message || "Verification failed");
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage("Something went wrong");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!email) return;
+    setMessage("");
+
+    try {
+      const res = await resendOTP(email);
+      if (res.success) {
+        setMessage("OTP resent successfully!");
+      } else {
+        setMessage("Failed to resend OTP");
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage("Something went wrong");
+    }
   };
 
   return (
@@ -61,7 +103,7 @@ const OTPVerification = () => {
           </h1>
           <p className="mt-2 text-muted-foreground">
             We sent a 6-digit code to{" "}
-            <span className="font-semibold text-foreground">your email</span>
+            <span className="font-semibold text-foreground">{email}</span>
           </p>
         </div>
 
@@ -85,6 +127,18 @@ const OTPVerification = () => {
               ))}
             </div>
 
+            {message && (
+              <p
+                className={`text-center text-sm mt-2 ${
+                  message.includes("success")
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
+                {message}
+              </p>
+            )}
+
             <button
               type="submit"
               disabled={otp.some((d) => !d) || isVerifying}
@@ -105,7 +159,10 @@ const OTPVerification = () => {
           <div className="text-center mt-6">
             <p className="text-sm text-muted-foreground">
               Didn't receive the code?{" "}
-              <button className="text-primary font-semibold hover:underline">
+              <button
+                onClick={handleResend}
+                className="text-primary font-semibold hover:underline"
+              >
                 Resend code
               </button>
             </p>

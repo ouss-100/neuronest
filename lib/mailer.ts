@@ -1,17 +1,30 @@
 import nodemailer from "nodemailer";
 
-export async function sendOTP(email: string, otp: string) {
-  // If running locally, just log OTP instead of sending email
-  if (process.env.NODE_ENV === "development") {
-    console.log(`[DEV] OTP for ${email}: ${otp}`);
-    return;
-  }
+export const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
-  // Production: send email using Gmail SMTP
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    throw new Error("EMAIL_USER and EMAIL_PASS must be set in production");
-  }
+export const sendOTPEmail = async (to: string, otp: string) => {
+  await transporter.sendMail({
+    from: `"NeuroNest" <${process.env.EMAIL_USER}>`,
+    to,
+    subject: "Verify your email",
+    html: `
+      <div style="font-family:sans-serif; text-align:center;">
+        <h2>Email Verification</h2>
+        <p>Your OTP code is:</p>
+        <h1 style="letter-spacing:5px;">${otp}</h1>
+        <p>This code expires in 3 minutes.</p>
+      </div>
+    `,
+  });
+};
 
+export const sendResetEmail = async (email: string, token: string) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -20,15 +33,17 @@ export async function sendOTP(email: string, otp: string) {
     },
   });
 
+  const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}`;
+
   await transporter.sendMail({
-    from: `"MindMap" <${process.env.EMAIL_USER}>`,
+    from: `"NeuroNest" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Your OTP Code",
+    subject: "Reset your password",
     html: `
-      <h2>Verify your account</h2>
-      <p>Your OTP is:</p>
-      <h1>${otp}</h1>
-      <p>It expires in 60 seconds.</p>
+      <h2>Password Reset</h2>
+      <p>Click below to reset your password:</p>
+      <a href="${resetLink}" target="_blank">${resetLink}</a>
+      <p>This link expires in 10 minutes.</p>
     `,
   });
-}
+};

@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { registerUser } from "@/server/userActions";
 import { motion } from "framer-motion";
 import {
@@ -32,13 +34,12 @@ const roles = [
   },
 ];
 
-import dynamic from "next/dynamic";
-
 const MapPicker = dynamic(() => import("@/components/MapPicker"), {
   ssr: false,
 });
 
 const Register = () => {
+  const router = useRouter();
   const [selectedRole, setSelectedRole] = useState("parent");
   const [mapPosition, setMapPosition] = useState<[number, number] | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
@@ -100,6 +101,7 @@ const Register = () => {
       setErrorMessage(res.message || "Something went wrong");
     } else {
       setSuccessMessage("Account created successfully 🎉");
+      router.push(`/OTP-verification?email=${formData.email}`);
     }
   };
 
