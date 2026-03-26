@@ -4,8 +4,9 @@ import ThemeProviderWrapper from "@/components/ThemeProviderWrapper";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import { cn } from "@/lib/utils";
+import AuthSessionProvider from "@/lib/session-provider";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const inter = Inter({
   variable: "--font-inter",
@@ -30,9 +31,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn("font-sans", geist.variable)}
+    >
       <body className={`${inter.variable} ${plusJakarta.variable} antialiased`}>
-        <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
+        <AuthSessionProvider>
+          <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
+        </AuthSessionProvider>
       </body>
     </html>
   );

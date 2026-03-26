@@ -18,7 +18,28 @@ import {
   BookOpen,
   ChevronLeft,
   X,
+  Bell,
+  Sun,
+  Moon,
 } from "lucide-react";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
 import { motion, AnimatePresence } from "framer-motion";
 
 type Role = "parent" | "doctor" | "admin";
@@ -35,18 +56,35 @@ export default function DashboardClient({
 
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [sidebarWidth, setSidebarWidth] = useState(256); // 256px = 64 (w-64)
+  const [sidebarWidth, setSidebarWidth] = useState(256);
+  const [darkMode, setDarkMode] = useState(false);
 
-  // Handle sidebar resize
+  const roleLabels = {
+    parent: "Parent",
+    doctor: "Doctor",
+    admin: "Admin",
+  };
+
+  const user = {
+    name: "Oussama",
+    email: "oussama@email.com",
+    initials: "OU",
+  };
+
+  const mockNotifications = [
+    { id: 1, text: "New appointment booked", time: "2 min ago", unread: true },
+    { id: 2, text: "Report is ready", time: "10 min ago", unread: false },
+  ];
+
+  const unreadCount = mockNotifications.filter((n) => n.unread).length;
+
+  const navigate = (path: string) => router.push(path);
+
   const handleResize = (e: MouseEvent) => {
     const newWidth = e.clientX;
     if (newWidth >= 100 && newWidth <= 400) {
       setSidebarWidth(newWidth);
-      if (newWidth < 120) {
-        setCollapsed(true);
-      } else {
-        setCollapsed(false);
-      }
+      setCollapsed(newWidth < 120);
     }
   };
 
@@ -61,7 +99,6 @@ export default function DashboardClient({
     window.removeEventListener("mouseup", stopResizing);
   };
 
-  // Cleanup event listeners
   useEffect(() => {
     return () => {
       window.removeEventListener("mousemove", handleResize);
@@ -75,11 +112,7 @@ export default function DashboardClient({
       { label: "Children", icon: Baby, to: "/parent/child-profile" },
       { label: "Assessment", icon: ClipboardList, to: "/parent/assessment" },
       { label: "Results", icon: BarChart3, to: "/parent/results" },
-      {
-        label: "Doctor Notes",
-        icon: Stethoscope,
-        to: "/parent/recommendations",
-      },
+      { label: "Doctor Notes", icon: Stethoscope, to: "/parent/recommendations" },
     ],
     doctor: [
       { label: "Dashboard", icon: LayoutDashboard, to: "/doctor/dashboard" },
@@ -101,22 +134,18 @@ export default function DashboardClient({
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* Desktop Sidebar - Fixed height, scrollable content */}
+      {/* Sidebar */}
       <aside
         className="hidden lg:flex flex-col border-r h-screen relative"
         style={{ width: collapsed ? 64 : sidebarWidth }}
       >
-        {/* Header - Fixed */}
-        <div className="flex-shrink-0 p-5 flex justify-between items-center border-b">
+        <div className="p-5 flex justify-between items-center border-b">
           {!collapsed && <span className="font-bold capitalize">{role}</span>}
           <button onClick={() => setCollapsed(!collapsed)}>
-            <ChevronLeft
-              className={`transition ${collapsed ? "rotate-180" : ""}`}
-            />
+            <ChevronLeft className={`transition ${collapsed ? "rotate-180" : ""}`} />
           </button>
         </div>
 
-        {/* Navigation - Scrollable */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
           {links.map((item) => (
             <Link
@@ -128,26 +157,24 @@ export default function DashboardClient({
                   : "text-muted-foreground hover:bg-muted"
               }`}
             >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              {!collapsed && <span className="truncate">{item.label}</span>}
+              <item.icon className="w-5 h-5" />
+              {!collapsed && <span>{item.label}</span>}
             </Link>
           ))}
         </nav>
 
-        {/* Footer - Fixed */}
-        <div className="flex-shrink-0 border-t">
+        <div className="border-t">
           <button
             onClick={() => router.push("/login")}
-            className="w-full p-4 flex gap-2 text-muted-foreground hover:bg-muted transition-colors"
+            className="w-full p-4 flex gap-2 text-muted-foreground hover:bg-muted"
           >
-            <LogOut className="w-5 h-5 flex-shrink-0" />
+            <LogOut className="w-5 h-5" />
             {!collapsed && "Logout"}
           </button>
         </div>
 
-        {/* Resize Handle */}
         <div
-          className="absolute right-0 top-0 w-1 h-full cursor-col-resize hover:bg-primary/20 active:bg-primary/40 transition-colors"
+          className="absolute right-0 top-0 w-1 h-full cursor-col-resize hover:bg-primary/20"
           onMouseDown={startResizing}
         />
       </aside>
@@ -159,57 +186,106 @@ export default function DashboardClient({
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
-            className="fixed inset-0 z-50 bg-background lg:hidden flex flex-col w-64 border-r h-screen"
+            className="fixed inset-0 z-50 bg-background lg:hidden flex flex-col w-64 border-r"
           >
-            <div className="flex-shrink-0 p-5 flex justify-between items-center border-b">
+            <div className="p-5 flex justify-between items-center border-b">
               <span className="font-bold capitalize">{role}</span>
               <button onClick={() => setMobileOpen(false)}>
                 <X />
               </button>
             </div>
+
             <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
               {links.map((item) => (
                 <Link
                   key={item.to}
                   href={item.to}
                   onClick={() => setMobileOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-xl ${
-                    isActive(item.to)
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted"
-                  }`}
+                  className="flex items-center gap-3 px-3 py-2 rounded-xl text-muted-foreground hover:bg-muted"
                 >
-                  <item.icon className="w-5 h-5 flex-shrink-0" />
+                  <item.icon className="w-5 h-5" />
                   {item.label}
                 </Link>
               ))}
             </nav>
-            <div className="flex-shrink-0 border-t">
-              <button
-                onClick={() => router.push("/login")}
-                className="w-full p-4 flex gap-2 text-muted-foreground hover:bg-muted transition-colors"
-              >
-                <LogOut className="w-5 h-5 flex-shrink-0" />
-                Logout
-              </button>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Main Content - Fixed header, scrollable content */}
+      {/* Main */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Mobile Header - Fixed */}
-        <header className="flex-shrink-0 h-14 flex items-center px-4 lg:hidden border-b">
-          <button onClick={() => setMobileOpen(true)}>
-            <Menu />
-          </button>
+        {/* NEW HEADER */}
+        <header className="h-14 flex items-center justify-between px-4 lg:px-8 border-b bg-card/60 backdrop-blur-md sticky top-0 z-30">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setMobileOpen(true)} className="lg:hidden">
+              <Menu className="w-5 h-5" />
+            </button>
+            <span className="font-bold text-sm lg:hidden">
+              {roleLabels[role]}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Theme */}
+            <button onClick={() => setDarkMode(!darkMode)}>
+              {darkMode ? <Sun /> : <Moon />}
+            </button>
+
+            {/* Notifications */}
+            <Popover>
+              <PopoverTrigger>
+                <button className="relative">
+                  <Bell />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
+                  )}
+                </button>
+              </PopoverTrigger>
+
+              <PopoverContent className="w-80">
+                {mockNotifications.map((n) => (
+                  <div key={n.id} className="p-2">
+                    <p>{n.text}</p>
+                    <small>{n.time}</small>
+                  </div>
+                ))}
+              </PopoverContent>
+            </Popover>
+
+            {/* User */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2">
+                  <Avatar>
+                    <AvatarFallback>{user.initials}</AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent>
+                <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem onClick={() => navigate(`/${role}`)}>
+                  Dashboard
+                </DropdownMenuItem>
+
+                <DropdownMenuItem onClick={() => navigate(`/${role}/settings`)}>
+                  Settings
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem onClick={() => navigate("/login")}>
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </header>
 
-        {/* Scrollable Content Area */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-6">{children}</div>
-        </main>
+        {/* Content */}
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>
   );

@@ -60,16 +60,16 @@ const Footer = () => (
               About
             </Link>
             <Link
-              href="/resources"
+              href="/our-impact"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              Resources
+              Our Impact
             </Link>
             <Link
-              href="/contact"
+              href="/privacy&ethics"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              Contact
+              Privacy & Ethics
             </Link>
           </div>
         </div>

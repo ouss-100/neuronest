@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import ThemeToggle from "@/components/theme-toggle";
@@ -19,6 +20,12 @@ const navLinks = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated";
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/" });
+  };
 
   return (
     <nav className="glass-nav sticky top-0 z-50">
@@ -55,16 +62,35 @@ export default function Navbar() {
 
         {/* Desktop Buttons + Theme Toggle */}
         <div className="hidden md:flex items-center gap-3">
-          <Link
-            href="/login"
-            className="btn-outline-primary !px-5 !py-2.5 text-sm"
-          >
-            Log In
-          </Link>
-          <Link href="/register" className="btn-accent !px-5 !py-2.5 text-sm">
-            Get Started
-          </Link>
-
+          {!isAuthenticated ? (
+            <>
+              <Link
+                href="/login"
+                className="btn-outline-primary !px-5 !py-2.5 text-sm"
+              >
+                Log In
+              </Link>
+              <Link href="/register" className="btn-accent !px-5 !py-2.5 text-sm">
+                Get Started
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/dashboard"
+                className="btn-outline-primary !px-5 !py-2.5 text-sm"
+              >
+                Dashboard
+              </Link>
+              <button
+                onClick={handleSignOut}
+                className="btn-accent !px-5 !py-2.5 text-sm"
+              >
+                Sign Out
+              </button>
+            </>
+          )}
+          
           {/* Theme Toggle Button */}
           <ThemeToggle className="ml-2" />
         </div>
@@ -112,18 +138,37 @@ export default function Navbar() {
               ))}
 
               <div className="flex gap-3 pt-2">
-                <Link
-                  href="/login"
-                  className="btn-outline-primary !px-5 !py-2.5 text-sm flex-1 text-center"
-                >
-                  Log In
-                </Link>
-                <Link
-                  href="/register"
-                  className="btn-accent !px-5 !py-2.5 text-sm flex-1 text-center"
-                >
-                  Get Started
-                </Link>
+                {!isAuthenticated ? (
+                  <>
+                    <Link
+                      href="/login"
+                      className="btn-outline-primary !px-5 !py-2.5 text-sm flex-1 text-center"
+                    >
+                      Log In
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="btn-accent !px-5 !py-2.5 text-sm flex-1 text-center"
+                    >
+                      Get Started
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/dashboard"
+                      className="btn-outline-primary !px-5 !py-2.5 text-sm flex-1 text-center"
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="btn-accent !px-5 !py-2.5 text-sm flex-1 text-center"
+                    >
+                      Sign Out
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

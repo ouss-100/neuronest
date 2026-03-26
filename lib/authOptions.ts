@@ -1,12 +1,12 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import type { AuthOptions } from "next-auth";
 import bcrypt from "bcryptjs";
-import UserModel from "@/models/user";
+import { User } from "@/models/user";
+import connectDB from "@/lib/mongodb";
 
 export const authOptions: AuthOptions = {
   session: {
     strategy: "jwt",
-    maxAge: 7 * 24 * 60 * 60,
   },
   pages: {
     signIn: "/signin",
@@ -19,9 +19,11 @@ export const authOptions: AuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        await connectDB();
+
         if (!credentials?.email || !credentials?.password) return null;
 
-        const user = await UserModel.findOne({ email: credentials.email });
+        const user = await User.findOne({ email: credentials.email });
         if (!user) return null;
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
@@ -29,7 +31,7 @@ export const authOptions: AuthOptions = {
 
         return {
           id: user._id.toString(),
-          name: user.name,
+          name: `${user.firstname} ${user.lastname}`,
           email: user.email,
           role: user.role,
         };
@@ -41,13 +43,23 @@ export const authOptions: AuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+
+        const now = Math.floor(Date.now() / 1000);
+
+        token.exp = user.role === "admin" ? now + 1 * 24 * 60 * 60 : now + 7 * 24 * 60 * 60;
       }
+
+      if (token.exp && Date.now() / 1000 > token.exp) {
+        throw new Error("Token expired");
+      }
+
       return token;
     },
+
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id;
-        session.user.role = token.role;
+        session.user.id = token.id!;
+        session.user.role = token.role!;
       }
       return session;
     },

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { resetPassword } from "@/server/authActions";
 import { motion } from "framer-motion";
 import {
   Lock,
@@ -23,6 +25,9 @@ const ResetPassword = () => {
   const [isResetting, setIsResetting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+
   const rules = [
     { label: "At least 8 characters", met: password.length >= 8 },
     { label: "One uppercase letter", met: /[A-Z]/.test(password) },
@@ -35,15 +40,24 @@ const ResetPassword = () => {
 
   const allMet = rules.every((r) => r.met);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!allMet) return;
+    if (!allMet || !token) return;
+
     setIsResetting(true);
-    setTimeout(() => {
-      setIsResetting(false);
+
+    const res = await resetPassword(token, password);
+
+    setIsResetting(false);
+
+    if (res?.success) {
       setIsSuccess(true);
-    }, 1500);
+    }
   };
+
+  if (!token) {
+    return <div>Invalid reset link</div>;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-6">
@@ -75,7 +89,7 @@ const ResetPassword = () => {
           </p>
         </div>
 
-        <div className="card-soft !p-8">
+        <div className="card-soft p-8!">
           {isSuccess ? (
             <motion.div
               initial={{ opacity: 0 }}
@@ -107,7 +121,7 @@ const ResetPassword = () => {
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
-                    className="input-soft !pl-11 !pr-11"
+                    className="input-soft pl-11! pr-11!"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
@@ -135,7 +149,7 @@ const ResetPassword = () => {
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
-                    className="input-soft !pl-11 !pr-11"
+                    className="input-soft pl-11! pr-11!"
                     type={showConfirm ? "text" : "password"}
                     placeholder="••••••••"
                     value={confirmPassword}

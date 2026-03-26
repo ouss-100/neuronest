@@ -38,14 +38,13 @@ export type RegisterInput = RegisterDoctorInput | RegisterParentInput;
 /* =======================
    RESPONSE
 ======================= */
-export interface RegisterResponse {
-  success: boolean;
-  message?: string;
-  user?: {
-    _id: string;
-    firstname: string;
-    lastname: string;
-    email: string;
-    role: UserRole;
-  };
-}
+export type RegisterResponse =
+  | {
+      success: true;
+      message: string;
+      verifyToken: string;
+    }
+  | {
+      success: false;
+      message: string;
+    };

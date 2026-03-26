@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { registerUser } from "@/server/userActions";
+import { registerUser } from "@/server/authActions";
 import { motion } from "framer-motion";
 import {
   Mail,
@@ -14,6 +14,9 @@ import {
   Users,
   Star,
   Phone,
+  Eye,
+  EyeOff,
+  CheckCircle,
 } from "lucide-react";
 import { useState } from "react";
 import { fadeUp } from "@/lib/animations";
@@ -44,6 +47,7 @@ const Register = () => {
   const [mapPosition, setMapPosition] = useState<[number, number] | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -56,6 +60,14 @@ const Register = () => {
     longitude: "",
     identityCard: null as File | null,
   });
+
+  const passwordRules = [
+    { label: "At least 8 characters", met: formData.password.length >= 8 },
+    { label: "One uppercase letter", met: /[A-Z]/.test(formData.password) },
+    { label: "One number", met: /\d/.test(formData.password) },
+  ];
+
+  const allPasswordRulesMet = passwordRules.every((r) => r.met);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, files } = e.target;
@@ -100,8 +112,7 @@ const Register = () => {
     if (!res.success) {
       setErrorMessage(res.message || "Something went wrong");
     } else {
-      setSuccessMessage("Account created successfully 🎉");
-      router.push(`/OTP-verification?email=${formData.email}`);
+      router.push(`/OTP-verification?token=${res.verifyToken}`);
     }
   };
 
@@ -135,7 +146,7 @@ const Register = () => {
         </motion.div>
 
         {/* Form */}
-        <motion.div {...fadeUp(1)} className="card-soft !p-8">
+        <motion.div {...fadeUp(1)} className="card-soft p-8!">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Role selector */}
             <motion.div {...fadeUp(2)}>
@@ -222,7 +233,7 @@ const Register = () => {
                       type="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="input-soft !pl-11 w-full"
+                      className="input-soft pl-11! w-full"
                       placeholder="Enter your email"
                       required
                     />
@@ -238,13 +249,50 @@ const Register = () => {
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
                       name="password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       value={formData.password}
                       onChange={handleInputChange}
-                      className="input-soft !pl-11 w-full"
+                      className="input-soft pl-11! w-full"
                       placeholder="••••••••"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Password strength rules */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pt-1">
+                    {passwordRules.map((rule) => (
+                      <div key={rule.label} className="flex items-center gap-2">
+                        <div
+                          className={`w-4 h-4 rounded-full flex items-center justify-center transition-colors ${
+                            rule.met ? "bg-secondary" : "bg-muted"
+                          }`}
+                        >
+                          {rule.met && (
+                            <CheckCircle className="w-3 h-3 text-secondary-foreground" />
+                          )}
+                        </div>
+                        <span
+                          className={`text-xs transition-colors ${
+                            rule.met
+                              ? "text-foreground"
+                              : "text-muted-foreground"
+                          }`}
+                        >
+                          {rule.label}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </motion.div>
@@ -287,7 +335,7 @@ const Register = () => {
                           type="email"
                           value={formData.email}
                           onChange={handleInputChange}
-                          className="input-soft !pl-11 w-full"
+                          className="input-soft pl-11! w-full"
                           placeholder="Enter your email"
                           required
                         />
@@ -306,7 +354,7 @@ const Register = () => {
                           type="tel"
                           value={formData.phone}
                           onChange={handleInputChange}
-                          className="input-soft !pl-11 w-full"
+                          className="input-soft pl-11! w-full"
                           placeholder="Enter your phone number"
                         />
                       </div>
@@ -339,13 +387,53 @@ const Register = () => {
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <input
                           name="password"
-                          type="password"
+                          type={showPassword ? "text" : "password"}
                           value={formData.password}
                           onChange={handleInputChange}
-                          className="input-soft !pl-11 w-full"
+                          className="input-soft pl-11! w-full"
                           placeholder="••••••••"
                           required
                         />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Password strength rules */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pt-1">
+                        {passwordRules.map((rule) => (
+                          <div
+                            key={rule.label}
+                            className="flex items-center gap-2"
+                          >
+                            <div
+                              className={`w-4 h-4 rounded-full flex items-center justify-center transition-colors ${
+                                rule.met ? "bg-secondary" : "bg-muted"
+                              }`}
+                            >
+                              {rule.met && (
+                                <CheckCircle className="w-3 h-3 text-secondary-foreground" />
+                              )}
+                            </div>
+                            <span
+                              className={`text-xs transition-colors ${
+                                rule.met
+                                  ? "text-foreground"
+                                  : "text-muted-foreground"
+                              }`}
+                            >
+                              {rule.label}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     </div>
 
@@ -360,7 +448,7 @@ const Register = () => {
                           name="specialty"
                           value={formData.specialty}
                           onChange={handleInputChange}
-                          className="input-soft !pl-11 w-full"
+                          className="input-soft pl-11! w-full"
                           placeholder="e.g., Pediatrician"
                           required
                         />
@@ -409,7 +497,7 @@ const Register = () => {
                           </p>
                         </div>
                         {formData.identityCard && (
-                          <p className="text-xs text-green-600 dark:text-green-400 mt-2 truncate max-w-[150px]">
+                          <p className="text-xs text-green-600 dark:text-green-400 mt-2 truncate mmax-w-37.5">
                             {formData.identityCard.name}
                           </p>
                         )}

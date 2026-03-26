@@ -15,6 +15,10 @@ export interface IPendingUser extends Document {
 
   otp: string;
   otpExpires: Date;
+
+  verifyToken: string;
+
+  status?: "pending" | "otp_verified" | "admin_verified";
 }
 
 const PendingUserSchema = new Schema<IPendingUser>(
@@ -33,8 +37,19 @@ const PendingUserSchema = new Schema<IPendingUser>(
 
     otp: String,
     otpExpires: Date,
+
+    verifyToken: {
+      type: String,
+      required: true,
+    },
+
+    status: {
+      type: String,
+      enum: ["pending", "otp_verified", "admin_verified"],
+      default: "pending",
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const PendingUser =
