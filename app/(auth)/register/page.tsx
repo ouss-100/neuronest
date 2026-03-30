@@ -60,6 +60,7 @@ const Register = () => {
     longitude: "",
     identityCard: null as File | null,
   });
+  
 
   const passwordRules = [
     { label: "At least 8 characters", met: formData.password.length >= 8 },
@@ -80,6 +81,7 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!allPasswordRulesMet) return;
 
     setErrorMessage("");
     setSuccessMessage("");

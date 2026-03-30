@@ -115,7 +115,7 @@ export default function DashboardClient({
       { label: "Doctor Notes", icon: Stethoscope, to: "/parent/recommendations" },
     ],
     doctor: [
-      { label: "Dashboard", icon: LayoutDashboard, to: "/doctor/dashboard" },
+      { label: "Dashboard", icon: LayoutDashboard, to: "/doctor" },
       { label: "Evaluations", icon: ClipboardList, to: "/doctor/evaluation" },
       { label: "Reports", icon: FileText, to: "/doctor/reports" },
       { label: "Appointments", icon: Calendar, to: "/doctor/appointments" },
@@ -125,7 +125,6 @@ export default function DashboardClient({
       { label: "Users", icon: Users, to: "/admin/users" },
       { label: "Content", icon: BookOpen, to: "/admin/content" },
       { label: "Reports", icon: BarChart3, to: "/admin/reports" },
-      { label: "Settings", icon: Settings, to: "/admin/settings" },
     ],
   };
 
@@ -214,7 +213,7 @@ export default function DashboardClient({
 
       {/* Main */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* NEW HEADER */}
+        {/* Header */}
         <header className="h-14 flex items-center justify-between px-4 lg:px-8 border-b bg-card/60 backdrop-blur-md sticky top-0 z-30">
           <div className="flex items-center gap-3">
             <button onClick={() => setMobileOpen(true)} className="lg:hidden">
@@ -226,56 +225,49 @@ export default function DashboardClient({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Theme */}
+            {/* Theme Toggle */}
             <button onClick={() => setDarkMode(!darkMode)}>
-              {darkMode ? <Sun /> : <Moon />}
+              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
 
-            {/* Notifications */}
+            {/* Notifications - FIXED: Removed nested button */}
             <Popover>
-              <PopoverTrigger>
-                <button className="relative">
-                  <Bell />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
-                  )}
-                </button>
+              <PopoverTrigger className="relative">
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
+                )}
               </PopoverTrigger>
-
               <PopoverContent className="w-80">
                 {mockNotifications.map((n) => (
-                  <div key={n.id} className="p-2">
-                    <p>{n.text}</p>
-                    <small>{n.time}</small>
+                  <div key={n.id} className="p-2 border-b last:border-0">
+                    <p className="text-sm font-medium">{n.text}</p>
+                    <small className="text-xs text-muted-foreground">{n.time}</small>
                   </div>
                 ))}
               </PopoverContent>
             </Popover>
 
-            {/* User */}
+            {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2">
-                  <Avatar>
+                  <Avatar className="h-8 w-8">
                     <AvatarFallback>{user.initials}</AvatarFallback>
                   </Avatar>
                 </button>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent>
+              <DropdownMenuContent align="end">
                 <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-
                 <DropdownMenuItem onClick={() => navigate(`/${role}`)}>
                   Dashboard
                 </DropdownMenuItem>
-
                 <DropdownMenuItem onClick={() => navigate(`/${role}/settings`)}>
                   Settings
                 </DropdownMenuItem>
-
                 <DropdownMenuSeparator />
-
                 <DropdownMenuItem onClick={() => navigate("/login")}>
                   Logout
                 </DropdownMenuItem>

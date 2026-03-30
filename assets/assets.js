@@ -36,7 +36,7 @@ export const images = {
 };
 
 export const contactInfo = [
-  { icon: Mail, label: "support@learnbright.com" },
+  { icon: Mail, label: "support@neuronest.com" },
   { icon: Phone, label: "+1 (555) 123-4567" },
   { icon: MapPin, label: "San Francisco, CA" },
 ];

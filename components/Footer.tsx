@@ -80,22 +80,16 @@ const Footer = () => (
           </h4>
           <div className="flex flex-col gap-2">
             <Link
-              href="/register"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Get Started
-            </Link>
-            <Link
               href="/resources"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              Guides
+              Resources
             </Link>
             <Link
               href="/contact"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              Support
+              Contact
             </Link>
           </div>
         </div>
@@ -105,12 +99,6 @@ const Footer = () => (
             For Professionals
           </h4>
           <div className="flex flex-col gap-2">
-            <Link
-              href="/login"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Doctor Portal
-            </Link>
             <Link
               href="/about"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"

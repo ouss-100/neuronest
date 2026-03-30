@@ -118,8 +118,7 @@ const Contact = () => {
                     I am a...
                   </option>
                   <option>Parent</option>
-                  <option>Healthcare professional</option>
-                  <option>Educator</option>
+                  <option>Doctor</option>
                   <option>Other</option>
                 </select>
                 <textarea
