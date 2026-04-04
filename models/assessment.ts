@@ -1,34 +1,49 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Model } from "mongoose";
 
-export interface IAssessment extends Document {
-  patient: mongoose.Types.ObjectId; // reference to User
-  doctor?: mongoose.Types.ObjectId; // optional reference
-  date: Date;
-  results: {
-    disorder: string;
-    severity: "mild" | "moderate" | "severe";
-    confidence: number; // AI confidence in %
-    recommendations: string[]; // Steps the patient should take
-  }[];
-  notes?: string; // optional doctor notes
+export interface IAssessmentStep {
+  title: string;
+  description: string;
+  order: number;
 }
 
-const AssessmentSchema: Schema = new Schema(
+export interface IAssessment extends Document {
+  childId: mongoose.Types.ObjectId;
+
+  symptomsSnapshot: string[];
+
+  steps: IAssessmentStep[];
+
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const StepSchema = new Schema<IAssessmentStep>(
   {
-    patient: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    doctor: { type: Schema.Types.ObjectId, ref: "User" },
-    date: { type: Date, default: Date.now },
-    results: [
-      {
-        disorder: { type: String, required: true },
-        severity: { type: String, enum: ["mild", "moderate", "severe"], required: true },
-        confidence: { type: Number, required: true },
-        recommendations: [{ type: String }],
-      },
-    ],
-    notes: { type: String, trim: true },
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    order: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
+const AssessmentSchema = new Schema<IAssessment>(
+  {
+    childId: {
+      type: Schema.Types.ObjectId,
+      ref: "Child",
+      required: true,
+      index: true,
+    },
+    symptomsSnapshot: {
+      type: [String],
+      required: true,
+    },
+    steps: [StepSchema],
   },
   { timestamps: true }
 );
 
-export default mongoose.models.Assessment || mongoose.model<IAssessment>("Assessment", AssessmentSchema);
+export const Assessment: Model<IAssessment> =
+  mongoose.models.Assessment ||
+  mongoose.model<IAssessment>("Assessment", AssessmentSchema);

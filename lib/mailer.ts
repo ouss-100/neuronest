@@ -12,10 +12,7 @@ export const transporter = nodemailer.createTransport({
 export const sendOTPEmail = async (
   to: string,
   otp: string,
-  token: string
 ) => {
-  const verifyLink = `${process.env.NEXT_PUBLIC_APP_URL}/OTP-verification?token=${token}`;
-
   await transporter.sendMail({
     from: `"NeuroNest" <${process.env.EMAIL_USER}>`,
     to,
@@ -24,7 +21,6 @@ export const sendOTPEmail = async (
       <h2>Your OTP Code</h2>
       <p>${otp}</p>
       <p>Or click below:</p>
-      <a href="${verifyLink}">Verify Account</a>
     `,
   });
 };

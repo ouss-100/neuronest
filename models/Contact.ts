@@ -15,7 +15,7 @@ const ContactSchema: Schema<IContact> = new Schema({
   email: { type: String, required: true, trim: true, lowercase: true },
   role: { 
     type: String, 
-    enum: ["Parent", "Healthcare professional", "Educator", "Other"], 
+    enum: ["Parent", "Healthcare professional", "Other"], 
     required: true 
   },
   message: { type: String, required: true, trim: true },

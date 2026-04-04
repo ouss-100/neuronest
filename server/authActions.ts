@@ -1,12 +1,11 @@
 "use server";
 
 import connectDB from "@/lib/mongodb";
-import { User, Doctor, Parent } from "@/models/user";
+import { User, Doctor, Parent } from "@/models/User";
 import bcrypt from "bcryptjs";
 import { RegisterInput, RegisterResponse } from "@/types/user";
 import { serializeUser } from "@/lib/serialize";
 import { sendOTPEmail, sendResetEmail } from "@/lib/mailer";
-import { PendingUser } from "@/models/pendingUser";
 import crypto from "crypto";
 
 /* =======================
@@ -80,7 +79,7 @@ export const verifyOTP = async (otp: string, token: string) => {
     const pending = await PendingUser.findOne({ verifyToken: token });
 
     console.log("PENDING USER:", pending);
-    
+
     if (!pending) {
       return { success: false, message: "Invalid session" };
     }
@@ -118,7 +117,6 @@ export const verifyOTP = async (otp: string, token: string) => {
         email: pending.email,
         password: pending.password,
         role: "parent",
-        children: 0,
         isVerified: true,
       });
     }

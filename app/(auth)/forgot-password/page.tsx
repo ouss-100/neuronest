@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { forgotPassword } from "@/server/authActions";
+import { forgotPassword } from "@/server/auth/forgotPassword";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, ArrowLeft } from "lucide-react";
@@ -15,29 +15,28 @@ const ForgotPassword = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (!email) return;
+  if (!email) return;
 
-    setLoading(true);
-    setError("");
+  setLoading(true);
+  setError("");
 
-    try {
-      const res = await forgotPassword(email);
+  try {
+    const res = await forgotPassword(email);
 
-      if (res?.error) {
-        setError(res.error);
-      } else {
-        setSuccess(true);
-      }
-    } catch (err) {
-      setError("Something went wrong");
+    if (!res.success) {
+      setError(res.message || "Something went wrong");
+    } else {
+      setSuccess(true);
     }
-
+  } catch (err: any) {
+    setError(err.message || "Something went wrong");
+  } finally {
     setLoading(false);
-  };
-
+  }
+};
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-6">
       <motion.div

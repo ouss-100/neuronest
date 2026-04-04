@@ -1,7 +1,7 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import type { AuthOptions } from "next-auth";
 import bcrypt from "bcryptjs";
-import { User } from "@/models/user";
+import { User } from "@/models/User";
 import connectDB from "@/lib/mongodb";
 
 export const authOptions: AuthOptions = {
@@ -26,7 +26,10 @@ export const authOptions: AuthOptions = {
         const user = await User.findOne({ email: credentials.email });
         if (!user) return null;
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
+        const isValid = await bcrypt.compare(
+          credentials.password,
+          user.password,
+        );
         if (!isValid) return null;
 
         return {
@@ -46,7 +49,10 @@ export const authOptions: AuthOptions = {
 
         const now = Math.floor(Date.now() / 1000);
 
-        token.exp = user.role === "admin" ? now + 1 * 24 * 60 * 60 : now + 7 * 24 * 60 * 60;
+        token.exp =
+          user.role === "admin"
+            ? now + 1 * 24 * 60 * 60
+            : now + 7 * 24 * 60 * 60;
       }
 
       if (token.exp && Date.now() / 1000 > token.exp) {

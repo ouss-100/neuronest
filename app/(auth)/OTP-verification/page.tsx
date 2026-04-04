@@ -4,13 +4,15 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { verifyOTP, resendOTP } from "@/server/authActions";
 import { ArrowRight } from "lucide-react";
 import { images } from "@/assets/assets";
-import { useSearchParams } from "next/navigation";
+import { verifyOTP } from "@/server/auth/verifyOTP";
+import { resendOTP } from "@/server/auth/resendOTP";
+import { useSession } from "next-auth/react";
 
 const OTPVerification = () => {
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -19,9 +21,24 @@ const OTPVerification = () => {
   const [isExpired, setIsExpired] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  useEffect(() => {
+    if (status === "loading") return;
 
+    if (!session) {
+      router.push("/login");
+    }
+  }, [session, status, router]);
+
+  /* =======================
+     AUTO FOCUS FIRST INPUT
+  ======================= */
+  useEffect(() => {
+    inputRefs.current[0]?.focus();
+  }, []);
+
+  /* =======================
+     TIMER
+  ======================= */
   useEffect(() => {
     if (timeLeft <= 0) {
       setIsExpired(true);
@@ -46,20 +63,28 @@ const OTPVerification = () => {
     setIsExpired(false);
   };
 
+  /* =======================
+     VERIFY OTP
+  ======================= */
   const verifyOTPCode = async (code: string) => {
+    if (!session) return;
+
     setIsVerifying(true);
     setMessage("");
 
     try {
-      const res = await verifyOTP(code, token!);
+      const res = await verifyOTP({ otp: code }); // ✅ no userId
       if (res.success) {
         setMessage("Email verified successfully!");
-        setTimeout(() => router.push("/login"), 1000);
+
+        setTimeout(() => {
+          router.push("/login");
+        }, 1000);
       } else {
         setMessage(res.message || "Verification failed");
       }
-    } catch {
-      setMessage("Something went wrong");
+    } catch (err: any) {
+      setMessage(err.message || "Something went wrong");
     } finally {
       setIsVerifying(false);
     }
@@ -101,17 +126,6 @@ const OTPVerification = () => {
           verifyOTPCode(pastedCode);
         }, 100);
       }
-    } else if (pastedCode.length > 0) {
-      const newOtp = [...otp];
-
-      for (let i = 0; i < pastedCode.length && i < 6; i++) {
-        newOtp[i] = pastedCode[i];
-      }
-
-      setOtp(newOtp);
-
-      const nextIndex = Math.min(pastedCode.length, 5);
-      inputRefs.current[nextIndex]?.focus();
     }
   };
 
@@ -125,12 +139,18 @@ const OTPVerification = () => {
     await verifyOTPCode(code);
   };
 
+  /* =======================
+     RESEND OTP
+  ======================= */
   const handleResend = async () => {
+    if (!session) return;
+
     setMessage("");
     setOtp(["", "", "", "", "", ""]);
 
     try {
-      const res = await resendOTP(token!);
+      const res = await resendOTP(); // ✅ no userId
+
       if (res.success) {
         setMessage("OTP resent!");
         resetTimer();
@@ -138,11 +158,14 @@ const OTPVerification = () => {
       } else {
         setMessage(res.message || "Failed to resend");
       }
-    } catch {
-      setMessage("Something went wrong");
+    } catch (err: any) {
+      setMessage(err.message || "Something went wrong");
     }
   };
 
+  /* =======================
+     UI
+  ======================= */
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-6">
       <div className="w-full max-w-md">

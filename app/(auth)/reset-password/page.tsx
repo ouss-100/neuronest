@@ -3,8 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
-import { resetPassword } from "@/server/authActions";
+import { resetPassword } from "@/server/auth/resetPassword";
 import { motion } from "framer-motion";
 import {
   Lock,
@@ -24,9 +23,10 @@ const ResetPassword = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState("");
 
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const [email, setEmail] = useState("");
+  const [otpValue, setOtpValue] = useState("");
 
   const rules = [
     { label: "At least 8 characters", met: password.length >= 8 },
@@ -42,22 +42,38 @@ const ResetPassword = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!allMet || !token) return;
+
+    if (!allMet) return;
 
     setIsResetting(true);
+    setError("");
 
-    const res = await resetPassword(token, password);
+    try {
+      const res = await resetPassword({
+        email,
+        otp: otpValue,
+        newPassword: password,
+      });
 
-    setIsResetting(false);
-
-    if (res?.success) {
-      setIsSuccess(true);
+      if (res.success) {
+        setIsSuccess(true);
+      } else {
+        setError(res.message || "Reset failed");
+      }
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setIsResetting(false);
     }
   };
 
-  if (!token) {
-    return <div>Invalid reset link</div>;
-  }
+  // if (!token) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center">
+  //       <p className="text-red-500">Invalid or expired reset link</p>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-6">
@@ -115,12 +131,36 @@ const ResetPassword = () => {
           ) : (
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
+                <label className="text-sm font-medium">Email</label>
+                <input
+                  className="input-soft"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">OTP Code</label>
+                <input
+                  className="input-soft"
+                  type="text"
+                  value={otpValue}
+                  onChange={(e) => setOtpValue(e.target.value)}
+                  placeholder="Enter OTP"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
                   New password
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
+                    disabled={isResetting}
                     className="input-soft pl-11! pr-11!"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
@@ -207,6 +247,7 @@ const ResetPassword = () => {
               </button>
             </form>
           )}
+          {error && <p className="text-sm text-red-500 text-center">{error}</p>}
         </div>
       </motion.div>
     </div>

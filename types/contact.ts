@@ -1,4 +1,4 @@
-export type Role = "Parent" | "Healthcare professional" | "Educator" | "Other";
+export type Role = "Parent" | "Healthcare professional" | "Other";
 
 export interface ContactFormData {
   firstName: string;

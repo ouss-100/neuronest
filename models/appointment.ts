@@ -1,26 +1,66 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Model } from "mongoose";
+
+export type AppointmentStatus =
+  | "pending"
+  | "confirmed"
+  | "cancelled"
+  | "completed";
 
 export interface IAppointment extends Document {
-  patient: mongoose.Types.ObjectId;
-  doctor: mongoose.Types.ObjectId;
-  date: Date;
-  status: "pending" | "confirmed" | "completed" | "cancelled";
+  parentId: mongoose.Types.ObjectId;
+  doctorId: mongoose.Types.ObjectId;
+  childId: mongoose.Types.ObjectId;
+
+  appointmentDate: Date;
   reason?: string;
+
+  status: AppointmentStatus;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const AppointmentSchema: Schema = new Schema(
+const AppointmentSchema = new Schema<IAppointment>(
   {
-    patient: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    doctor: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    date: { type: Date, required: true },
-    status: {
-      type: String,
-      enum: ["pending", "confirmed", "completed", "cancelled"],
-      default: "pending",
+    parentId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
+    doctorId: {
+      type: Schema.Types.ObjectId,
+      ref: "Doctor",
+      required: true,
+      index: true,
+    },
+    childId: {
+      type: Schema.Types.ObjectId,
+      ref: "Child",
+      required: true,
+      index: true,
+    },
+    appointmentDate: {
+      type: Date,
+      required: true,
+      index: true,
     },
     reason: { type: String, trim: true },
+    status: {
+      type: String,
+      enum: ["pending", "confirmed", "cancelled", "completed"],
+      default: "pending",
+    },
   },
   { timestamps: true }
 );
 
-export default mongoose.models.Appointment || mongoose.model<IAppointment>("Appointment", AppointmentSchema);
+// prevent double booking
+AppointmentSchema.index(
+  { doctorId: 1, appointmentDate: 1 },
+  { unique: true }
+);
+
+export const Appointment: Model<IAppointment> =
+  mongoose.models.Appointment ||
+  mongoose.model<IAppointment>("Appointment", AppointmentSchema);

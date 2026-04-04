@@ -1,7 +1,7 @@
 "use server";
 
 import connectDB from "@/lib/mongodb";
-import { User } from "@/models/user";
+import { User } from "@/models/User";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { sendResetEmail } from "@/lib/mailer";

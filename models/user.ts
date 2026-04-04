@@ -1,119 +1,88 @@
 import mongoose, { Schema, Model, Document } from "mongoose";
+import bcrypt from "bcryptjs";
 
-/* =======================
-   ENUM
-======================= */
 export enum UserRole {
-  ADMIN = "admin",
-  DOCTOR = "doctor",
-  PARENT = "parent",
+  ADMIN = "ADMIN",
+  DOCTOR = "DOCTOR",
+  PARENT = "PARENT",
 }
 
-/* =======================
-   BASE USER
-======================= */
+// USER
 export interface IUser extends Document {
   firstname: string;
   lastname: string;
+  phone: {
+    countryCode: string;
+    number: string;
+  };
   email: string;
   password: string;
   role: UserRole;
+
   isVerified: boolean;
-  otp: string;
-  otpExpires: Date | null;
-  resetPasswordToken?: string;
-  resetPasswordExpires?: Date;
+  lastOTPSendAt: Date;
+  verificationAttempts: number;
+
+  comparePassword(password: string): Promise<boolean>;
 }
 
 const userSchema = new Schema<IUser>(
   {
     firstname: { type: String, required: true, trim: true },
     lastname: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true },
+
+    phone: {
+      countryCode: { type: String, required: true },
+      number: { type: String, required: true },
+    },
+
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+
     password: { type: String, required: true },
-    role: { type: String, enum: Object.values(UserRole), required: true },
+
+    role: {
+      type: String,
+      enum: ["ADMIN", "DOCTOR", "PARENT"],
+      required: true,
+    },
+
     isVerified: { type: Boolean, default: false },
-    otp: { type: String },
-    otpExpires: { type: Date },
+
+    lastOTPSendAt: { type: Date, default: null },
+
+    verificationAttempts: { type: Number, default: 0 },
   },
   {
     timestamps: true,
-    discriminatorKey: "role",
+    discriminatorKey: "userType",
   },
 );
 
+/* =======================
+   PASSWORD HASHING
+======================= */
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
+
+/* =======================
+   PASSWORD CHECK
+======================= */
+userSchema.methods.comparePassword = function (password: string) {
+  return bcrypt.compare(password, this.password);
+};
+
+/* =======================
+   EXPORT USER
+======================= */
 export const User: Model<IUser> =
   mongoose.models.User || mongoose.model<IUser>("User", userSchema);
-
-/* =======================
-   DOCTOR
-======================= */
-export interface IDoctor extends IUser {
-  phone: string;
-  specialty: string;
-  rating: number;
-  reviews: number;
-  latitude: number;
-  longitude: number;
-  identityCard: string;
-}
-
-const doctorSchema = new Schema<IDoctor>({
-  phone: {
-    type: String,
-    required: true,
-  },
-
-  specialty: {
-    type: String,
-    required: true,
-  },
-
-  rating: {
-    type: Number,
-    default: 0,
-  },
-
-  reviews: {
-    type: Number,
-    default: 0,
-  },
-
-  latitude: {
-    type: Number,
-    required: true,
-  },
-
-  longitude: {
-    type: Number,
-    required: true,
-  },
-
-  identityCard: {
-    type: String,
-    required: true,
-  },
-});
-
-export const Doctor: Model<IDoctor> =
-  (mongoose.models.doctor as Model<IDoctor>) ||
-  User.discriminator<IDoctor>("doctor", doctorSchema);
-
-/* =======================
-   PARENT
-======================= */
-export interface IParent extends IUser {
-  children: number;
-}
-
-const parentSchema = new Schema<IParent>({
-  children: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-});
-
-export const Parent: Model<IParent> =
-  (mongoose.models.parent as Model<IParent>) ||
-  User.discriminator<IParent>("parent", parentSchema);
