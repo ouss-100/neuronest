@@ -13,10 +13,9 @@ export const registerUser = async (data: RegisterInput) => {
   await connectDB();
 
   const session = await mongoose.startSession();
+  session.startTransaction();
 
   try {
-    session.startTransaction();
-
     const existingUser = await User.findOne({
       email: data.email,
     }).session(session);
@@ -25,7 +24,8 @@ export const registerUser = async (data: RegisterInput) => {
        USER EXISTS + VERIFIED
     ======================= */
     if (existingUser && existingUser.isVerified) {
-      throw new Error("User already exists");
+      await session.abortTransaction();
+      return { success: false, message: "User already exists" };
     }
 
     /* =======================
@@ -47,13 +47,14 @@ export const registerUser = async (data: RegisterInput) => {
             expiredAt: new Date(Date.now() + 3 * 60 * 1000),
           },
         ],
-        { session },
+        { session }
       );
 
-      console.log("Resent OTP:", otp);
-      await sendOTPEmail(existingUser.email, otp);
-
       await session.commitTransaction();
+      session.endSession();
+
+      // ✅ send email OUTSIDE transaction
+      await sendOTPEmail(existingUser.email, otp);
 
       return {
         success: true,
@@ -80,40 +81,25 @@ export const registerUser = async (data: RegisterInput) => {
       [newUser] = await Doctor.create(
         [
           {
-            firstname: data.firstname,
-            lastname: data.lastname,
-            email: data.email,
-            password: data.password,
-            phone: data.phone,
+            ...data,
             role: "DOCTOR",
-
-            specialty: data.specialty,
-            latitude: data.latitude,
-            longitude: data.longitude,
-            identityCard: data.identityCard,
-
             isVerified: false,
             lastOTPSendAt: new Date(),
           },
         ],
-        { session },
+        { session }
       );
     } else {
       [newUser] = await Parent.create(
         [
           {
-            firstname: data.firstname,
-            lastname: data.lastname,
-            email: data.email,
-            password: data.password,
-            phone: data.phone,
+            ...data,
             role: "PARENT",
-
             isVerified: false,
             lastOTPSendAt: new Date(),
           },
         ],
-        { session },
+        { session }
       );
     }
 
@@ -130,26 +116,29 @@ export const registerUser = async (data: RegisterInput) => {
           expiredAt: new Date(Date.now() + 3 * 60 * 1000),
         },
       ],
-      { session },
+      { session }
     );
-    await sendOTPEmail(newUser.email, otp);
 
     await session.commitTransaction();
+    session.endSession();
 
-    console.log("OTP:", otp);
+    // ✅ send email AFTER commit
+    await sendOTPEmail(newUser.email, otp);
 
     return {
       success: true,
       message: "User registered. OTP sent.",
-      userId: newUser._id.toString(), // ✅ pass this to frontend
+      userId: newUser._id.toString(),
     };
   } catch (error: any) {
     await session.abortTransaction();
+    session.endSession();
 
     console.error("Register error:", error.message);
 
-    throw new Error(error.message || "Something went wrong");
-  } finally {
-    session.endSession();
+    return {
+      success: false,
+      message: error.message || "Something went wrong",
+    };
   }
 };

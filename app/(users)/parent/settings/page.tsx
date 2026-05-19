@@ -54,7 +54,7 @@ const ParentSettings = () => {
   ];
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">Settings</h1>
         <p className="text-muted-foreground mt-1">Manage your profile and notification preferences</p>

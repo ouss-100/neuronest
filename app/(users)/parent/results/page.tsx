@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 const Results = () => (
-  <div className="space-y-6 max-w-4xl">
+  <div className="space-y-6">
     <Link
       href="/parent"
       className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"

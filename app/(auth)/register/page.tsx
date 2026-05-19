@@ -23,7 +23,6 @@ import { images } from "@/assets/assets";
 import { registerUser } from "@/server/auth/register";
 import CountryCodeSelect from "@/components/CountryCodeSelect";
 import { RegisterInput } from "@/types/RegisterInput";
-import { signIn } from "next-auth/react";
 
 const roles = [
   {
@@ -100,7 +99,6 @@ const Register = () => {
           number: formData.phone,
         },
         role: "DOCTOR",
-
         specialty: formData.specialty,
         latitude: Number(formData.latitude),
         longitude: Number(formData.longitude),
@@ -124,24 +122,14 @@ const Register = () => {
       const res = await registerUser(payload);
 
       if (!res.success) {
-        setErrorMessage(res.message || "Something went wrong");
+        setErrorMessage(res.message);
         return;
       }
 
-      // ✅ STEP 1: Login user (create session)
-      const loginRes = await signIn("credentials", {
-        email: formData.email,
-        password: formData.password,
-        redirect: false,
-      });
-
-      if (loginRes?.error) {
-        setErrorMessage("Login failed after registration");
-        return;
-      }
-      router.push("/OTP-verification");
+      // ✅ pass userId
+      router.push(`/OTP-verification`);
     } catch (err: any) {
-      setErrorMessage(err.message || "Something went wrong");
+      setErrorMessage("Unexpected error");
     }
   };
   return (

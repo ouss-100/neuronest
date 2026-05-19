@@ -61,7 +61,7 @@ const Assessment = () => {
         href="/parent"
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
-        <ArrowLeft className="w-4 h-4" /> Save & Exit
+        <ArrowLeft className="w-4 h-4" /> Exit
       </Link>
 
       <motion.div layout className="card-soft !rounded-[40px] !p-8 lg:!p-10">

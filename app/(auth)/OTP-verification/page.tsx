@@ -10,6 +10,7 @@ import { verifyOTP } from "@/server/auth/verifyOTP";
 import { resendOTP } from "@/server/auth/resendOTP";
 import { useSession } from "next-auth/react";
 
+
 const OTPVerification = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -23,10 +24,6 @@ const OTPVerification = () => {
 
   useEffect(() => {
     if (status === "loading") return;
-
-    if (!session) {
-      router.push("/login");
-    }
   }, [session, status, router]);
 
   /* =======================

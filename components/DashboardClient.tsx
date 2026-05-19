@@ -112,7 +112,11 @@ export default function DashboardClient({
       { label: "Children", icon: Baby, to: "/parent/child-profile" },
       { label: "Assessment", icon: ClipboardList, to: "/parent/assessment" },
       { label: "Results", icon: BarChart3, to: "/parent/results" },
-      { label: "Doctor Notes", icon: Stethoscope, to: "/parent/recommendations" },
+      {
+        label: "Doctor Notes",
+        icon: Stethoscope,
+        to: "/parent/recommendations",
+      },
     ],
     doctor: [
       { label: "Dashboard", icon: LayoutDashboard, to: "/doctor" },
@@ -123,7 +127,7 @@ export default function DashboardClient({
     admin: [
       { label: "Dashboard", icon: LayoutDashboard, to: "/admin" },
       { label: "Users", icon: Users, to: "/admin/users" },
-      { label: "Content", icon: BookOpen, to: "/admin/content" },
+      { label: "Notifications", icon: Bell, to: "/admin/notifications" },
       { label: "Reports", icon: BarChart3, to: "/admin/reports" },
     ],
   };
@@ -141,7 +145,9 @@ export default function DashboardClient({
         <div className="p-5 flex justify-between items-center border-b">
           {!collapsed && <span className="font-bold capitalize">{role}</span>}
           <button onClick={() => setCollapsed(!collapsed)}>
-            <ChevronLeft className={`transition ${collapsed ? "rotate-180" : ""}`} />
+            <ChevronLeft
+              className={`transition ${collapsed ? "rotate-180" : ""}`}
+            />
           </button>
         </div>
 
@@ -227,7 +233,11 @@ export default function DashboardClient({
           <div className="flex items-center gap-2">
             {/* Theme Toggle */}
             <button onClick={() => setDarkMode(!darkMode)}>
-              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {darkMode ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
             </button>
 
             {/* Notifications - FIXED: Removed nested button */}
@@ -242,7 +252,9 @@ export default function DashboardClient({
                 {mockNotifications.map((n) => (
                   <div key={n.id} className="p-2 border-b last:border-0">
                     <p className="text-sm font-medium">{n.text}</p>
-                    <small className="text-xs text-muted-foreground">{n.time}</small>
+                    <small className="text-xs text-muted-foreground">
+                      {n.time}
+                    </small>
                   </div>
                 ))}
               </PopoverContent>

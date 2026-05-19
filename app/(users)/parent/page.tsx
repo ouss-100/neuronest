@@ -13,7 +13,7 @@ import { children, notifications } from "@/assets/assets";
 import StatCard from "@/components/StatCard";
 
 const ParentDashboard = () => (
-  <div className="space-y-6 max-w-6xl">
+  <div className="space-y-6">
     <div>
       <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">
         Welcome back, Sarah 👋

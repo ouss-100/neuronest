@@ -269,33 +269,113 @@ export const assessments = [
 export const questions = [
   {
     id: 1,
-    text: "Does your child struggle to follow multi-step instructions?",
-    options: ["Never", "Sometimes", "Often", "Always"],
+    text: "Does he have health probems ?",
+    options: ["No", "Yes"],
   },
   {
     id: 2,
-    text: "Does your child have difficulty recognizing letters or words?",
-    options: ["Never", "Sometimes", "Often", "Always"],
+    text: "Does he have social family problems?:",
+    options: ["No", "Yes"],
   },
   {
     id: 3,
-    text: "Does your child often lose focus during tasks?",
-    options: ["Never", "Sometimes", "Often", "Always"],
+    text: "Is there a variation between his real qualifications and its results?",
+    options: ["Yeah", "No"],
   },
   {
     id: 4,
-    text: "Does your child mix up similar-looking letters (b/d, p/q)?",
-    options: ["Never", "Sometimes", "Often", "Always"],
+    text: "Does he have any difficulties?",
+    options: ["In particular article", "In all materials"],
   },
   {
     id: 5,
-    text: "Does your child struggle with basic counting or number patterns?",
-    options: ["Never", "Sometimes", "Often", "Always"],
+    text: "Does your child avoid activities that require reading to complete?",
+    options: ["Repeatedly / always", "Sometimes", "Rarely / never"],
   },
   {
     id: 6,
-    text: "Does your child have trouble organizing their belongings?",
-    options: ["Never", "Sometimes", "Often", "Always"],
+    text: "Is he fast/slow while reading?",
+    options: ["Average", "Slow", "Fast"],
+  },
+  {
+    id: 7,
+    text: "When reading aloud, does your child repeat words, change their order, or mix up similar letters (b/d, p/q, m/w, p/b, f/v, k/g/j) without notice?",
+    options: ["Rarely / never", "Repeatedly / always", "Sometimes"],
+  },
+  {
+    id: 8,
+    text: "Does he have trouble reading unknown words?",
+    options: ["Sometimes", "Rarely / never", "Repeatedly / always"],
+  },
+  {
+    id: 9,
+    text: "Does he face difficulty understanding what he read?",
+    options: ["Rarely / never", "Sometimes", "Repeatedly / always"],
+  },
+  {
+    id: 10,
+    text: "Does he reverse numbers? (e.g., 81 -> 18)",
+    options: ["Rarely / never", "Sometimes", "Repeatedly / always"],
+  },
+  {
+    id: 11,
+    text: "Does he have trouble writing numbers clearly and distinctly from letters?",
+    options: ["Rarely / never", "Sometimes", "Repeatedly / always"],
+  },
+  {
+    id: 12,
+    text: "Does he make misspellings in his homework?",
+    options: ["Rarely / never", "Repeatedly / always", "Sometimes"],
+  },
+  {
+    id: 13,
+    text: "Is he having trouble writing on the line and inside the margins?",
+    options: ["Repeatedly / always", "Sometimes", "Rarely / never"],
+  },
+  {
+    id: 14,
+    text: "Does he have a problem copying?",
+    options: ["Repeatedly / always", "Rarely / never", "Sometimes"],
+  },
+  {
+    id: 15,
+    text: "Does he confuse symbols and/or mathematical operations?",
+    options: ["Sometimes", "Rarely / never", "Repeatedly / always"],
+  },
+  {
+    id: 16,
+    text: "Does he have trouble comparing the relative size of integers and/or fractions?",
+    options: ["Repeatedly / always", "Sometimes", "Rarely / never"],
+  },
+  {
+    id: 17,
+    text: "Does he have difficulties with concepts related to time and/or money?",
+    options: ["Sometimes", "Repeatedly / always", "Rarely / never"],
+  },
+  {
+    id: 18,
+    text: "Is it difficult to understand the statement of calculations and solve it?",
+    options: ["Sometimes", "Rarely / never", "Repeatedly / always"],
+  },
+  {
+    id: 19,
+    text: "Is he having difficulties in calculating? (Facing problems in performing arithmetic operations such as addition and subtraction ...)",
+    options: ["Repeatedly / always", "Sometimes", "Rarely / never"],
+  },
+  {
+    id: 20,
+    text: "Is he having trouble maintaining attention for more than 15 minutes?",
+    options: ["Repeatedly / always", "Sometimes", "Rarely / never"],
+  },
+  {
+    id: 21,
+    text: "Does it take a long time to complete simple tasks?",
+    options: ["Rarely / never", "Repeatedly / always", "Sometimes"],
+  },
+  {
+    id: 22,
+    text: "Does he have a hard time bearing boredom or strenuous tasks?",
+    options: ["Repeatedly / always", "Rarely / never", "Sometimes"],
   },
 ];
 
