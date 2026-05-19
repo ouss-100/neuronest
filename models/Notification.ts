@@ -1,0 +1,26 @@
+import mongoose, { Schema, Document, Model } from "mongoose";
+
+export interface INotification extends Document {
+  type: "user" | "contact";
+  title: string;
+  message: string;
+  read: boolean;
+  createdAt: Date;
+}
+
+const NotificationSchema: Schema<INotification> = new Schema({
+  type: { 
+    type: String, 
+    enum: ["user", "contact"], 
+    required: true 
+  },
+  title: { type: String, required: true },
+  message: { type: String, required: true },
+  read: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+});
+
+const Notification: Model<INotification> = 
+  mongoose.models.Notification || mongoose.model<INotification>("Notification", NotificationSchema);
+
+export default Notification;

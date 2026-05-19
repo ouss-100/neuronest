@@ -9,10 +9,13 @@ export interface IAssessmentStep {
 export interface IAssessment extends Document {
   childId: mongoose.Types.ObjectId;
 
-  symptomsSnapshot: string[];
+  symptomsSnapshot?: string[];
+  steps?: IAssessmentStep[];
 
-  steps: IAssessmentStep[];
-
+  // AI Screening Results
+  score: number;
+  analysis: Array<{ area: string; score: number; status: string }>;
+  recommendations: string[];
 
   createdAt: Date;
   updatedAt: Date;
@@ -37,9 +40,27 @@ const AssessmentSchema = new Schema<IAssessment>(
     },
     symptomsSnapshot: {
       type: [String],
+      required: false,
+    },
+    steps: {
+      type: [StepSchema],
+      required: false,
+    },
+    score: {
+      type: Number,
       required: true,
     },
-    steps: [StepSchema],
+    analysis: [
+      {
+        area: { type: String, required: true },
+        score: { type: Number, required: true },
+        status: { type: String, required: true },
+      },
+    ],
+    recommendations: {
+      type: [String],
+      required: true,
+    },
   },
   { timestamps: true }
 );

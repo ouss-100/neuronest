@@ -128,7 +128,6 @@ export default function DashboardClient({
       { label: "Dashboard", icon: LayoutDashboard, to: "/admin" },
       { label: "Users", icon: Users, to: "/admin/users" },
       { label: "Notifications", icon: Bell, to: "/admin/notifications" },
-      { label: "Reports", icon: BarChart3, to: "/admin/reports" },
     ],
   };
 
@@ -156,11 +155,10 @@ export default function DashboardClient({
             <Link
               key={item.to}
               href={item.to}
-              className={`flex items-center gap-3 px-3 py-2 rounded-xl ${
-                isActive(item.to)
+              className={`flex items-center gap-3 px-3 py-2 rounded-xl ${isActive(item.to)
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-muted"
-              }`}
+                }`}
             >
               <item.icon className="w-5 h-5" />
               {!collapsed && <span>{item.label}</span>}

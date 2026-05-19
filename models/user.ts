@@ -20,6 +20,7 @@ export interface IUser extends Document {
   role: UserRole;
 
   isVerified: boolean;
+  isActive: boolean;
   lastOTPSendAt: Date;
   verificationAttempts: number;
 
@@ -53,6 +54,7 @@ const userSchema = new Schema<IUser>(
     },
 
     isVerified: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
 
     lastOTPSendAt: { type: Date, default: null },
 

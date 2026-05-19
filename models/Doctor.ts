@@ -16,8 +16,12 @@ const doctorSchema = new Schema<IDoctor>({
   longitude: { type: Number, required: true },
 
   identityCard: { type: String, required: true },
+});
 
-  isActive: { type: Boolean, default: false },
+doctorSchema.pre("save", async function () {
+  if (this.isNew) {
+    this.isActive = false;
+  }
 });
 
 /* =======================

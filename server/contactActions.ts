@@ -2,6 +2,7 @@
 
 import dbConnect from "@/lib/mongodb";
 import Contact from "@/models/Contact";
+import Notification from "@/models/Notification";
 import { Types } from "mongoose";
 import { Role } from "@/types/contact";
 
@@ -15,7 +16,16 @@ export async function insertContact(data: {
   await dbConnect();
 
   try {
-    await Contact.create(data);
+    const contact = await Contact.create(data);
+    
+    // Create admin notification
+    await Notification.create({
+      type: "contact",
+      title: "New Contact Message",
+      message: `${data.firstName} ${data.lastName} submitted a message: "${data.message.substring(0, 100)}${data.message.length > 100 ? '...' : ''}"`,
+      read: false
+    });
+
     return { success: true };
   } catch (err) {
     console.error("Error inserting contact:", err);

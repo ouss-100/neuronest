@@ -5,33 +5,28 @@ import {
   MoreHorizontal,
   UserCheck,
   UserX,
-  Edit,
-  Trash2,
-  Shield,
   Mail,
   Users,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SearchInput from "@/components/admin/SearchInput";
 import FilterTabs from "@/components/admin/FilterTabs";
 import AvatarBadge from "@/components/admin/AvatarBadge";
 import StatusBadge from "@/components/admin/StatusBadge";
 import Pagination from "@/components/admin/Pagination";
-import ConfirmDeleteModal from "@/components/admin/ConfirmDeleteModal";
 import EmptyState from "@/components/admin/EmptyState";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { getAllUsers, toggleUserStatus } from "@/server/adminActions";
 
 interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
   role: "Parent" | "Doctor" | "Admin";
@@ -39,97 +34,58 @@ interface User {
   joined: string;
 }
 
-const allUsers: User[] = [
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    email: "sarah@example.com",
-    role: "Parent",
-    status: "active",
-    joined: "Jan 15, 2026",
-  },
-  {
-    id: 2,
-    name: "Dr. James Smith",
-    email: "james@clinic.com",
-    role: "Doctor",
-    status: "active",
-    joined: "Dec 1, 2025",
-  },
-  {
-    id: 3,
-    name: "Wei Chen",
-    email: "wei@example.com",
-    role: "Parent",
-    status: "active",
-    joined: "Feb 20, 2026",
-  },
-  {
-    id: 4,
-    name: "Dr. Lisa Park",
-    email: "lisa@hospital.com",
-    role: "Doctor",
-    status: "inactive",
-    joined: "Nov 10, 2025",
-  },
-  {
-    id: 5,
-    name: "Ana Martinez",
-    email: "ana@example.com",
-    role: "Parent",
-    status: "active",
-    joined: "Mar 5, 2026",
-  },
-  {
-    id: 6,
-    name: "Dr. Robert Kim",
-    email: "robert@clinic.com",
-    role: "Doctor",
-    status: "active",
-    joined: "Jan 8, 2026",
-  },
-  {
-    id: 7,
-    name: "Emily Davis",
-    email: "emily@example.com",
-    role: "Parent",
-    status: "active",
-    joined: "Mar 12, 2026",
-  },
-  {
-    id: 8,
-    name: "Carlos Rivera",
-    email: "carlos@example.com",
-    role: "Parent",
-    status: "inactive",
-    joined: "Oct 22, 2025",
-  },
-  {
-    id: 9,
-    name: "Dr. Fatima Ali",
-    email: "fatima@hospital.com",
-    role: "Doctor",
-    status: "active",
-    joined: "Feb 14, 2026",
-  },
-  {
-    id: 10,
-    name: "Michael Brown",
-    email: "michael@example.com",
-    role: "Parent",
-    status: "active",
-    joined: "Mar 1, 2026",
-  },
-];
-
 const ITEMS_PER_PAGE = 5;
 
 const AdminUsers = () => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
-  const [users, setUsers] = useState<User[]>(allUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const res = await getAllUsers();
+        if (res.success && res.users) {
+          const mappedUsers: User[] = res.users.map((u: any) => ({
+            id: u._id,
+            name: `${u.firstname || ""} ${u.lastname || ""}`.trim(),
+            email: u.email,
+            role:
+              u.role === "ADMIN" || u.role === "admin"
+                ? "Admin"
+                : u.role === "DOCTOR" || u.role === "doctor"
+                  ? "Doctor"
+                  : "Parent",
+            status: u.isActive ? "active" : "inactive",
+            joined: u.createdAt
+              ? new Date(u.createdAt).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })
+              : "Unknown",
+          }));
+          setUsers(mappedUsers);
+        } else {
+          toast.error("Failed to load users", {
+            description: res.message || "An error occurred while fetching users.",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        toast.error("Failed to load users", {
+          description: "An unexpected error occurred.",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const filtered = users.filter((u) => {
     const matchesSearch =
@@ -150,31 +106,28 @@ const AdminUsers = () => {
     page * ITEMS_PER_PAGE,
   );
 
-  const toggleStatus = (id: number) => {
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === id
-          ? { ...u, status: u.status === "active" ? "inactive" : "active" }
-          : u,
-      ),
-    );
+  const toggleStatus = async (id: string) => {
+    const res = await toggleUserStatus(id);
+    if (res.success) {
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === id
+            ? { ...u, status: u.status === "active" ? "inactive" : "active" }
+            : u,
+        ),
+      );
 
-    toast.success("User status updated", {
-      description: "The user's account status has been changed.",
-    });
+      toast.success("User status updated", {
+        description: res.message || "The user's account status has been changed.",
+      });
+    } else {
+      toast.error("Failed to update status", {
+        description: res.message || "An error occurred while updating status.",
+      });
+    }
   };
 
-  const handleDelete = () => {
-    if (!deleteTarget) return;
 
-    setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
-
-    toast.success("User deleted", {
-      description: `${deleteTarget.name} has been removed.`,
-    });
-
-    setDeleteTarget(null);
-  };
 
   return (
     <div className="space-y-6">
@@ -209,7 +162,30 @@ const AdminUsers = () => {
         />
       </div>
 
-      {paginated.length === 0 ? (
+      {loading ? (
+        <div className="space-y-2">
+          {[...Array(5)].map((_, i) => (
+            <div
+              key={i}
+              className="card-soft !p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-pulse"
+            >
+              <div className="flex items-center gap-4 w-full sm:w-auto">
+                <div className="w-10 h-10 rounded-full bg-muted" />
+                <div className="space-y-2 flex-1 sm:flex-none">
+                  <div className="h-4 w-32 bg-muted rounded" />
+                  <div className="h-3 w-48 bg-muted rounded" />
+                </div>
+              </div>
+              <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                <div className="h-5 w-16 bg-muted rounded-full" />
+                <div className="h-5 w-16 bg-muted rounded-full" />
+                <div className="h-3 w-20 bg-muted rounded hidden md:block" />
+                <div className="w-8 h-8 rounded-xl bg-muted" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : paginated.length === 0 ? (
         <EmptyState
           icon={Users}
           title="No users found"
@@ -264,9 +240,6 @@ const AdminUsers = () => {
                       align="end"
                       className="rounded-xl w-48"
                     >
-                      <DropdownMenuItem className="gap-2 rounded-lg">
-                        <Edit className="w-4 h-4" /> Edit User
-                      </DropdownMenuItem>
 
                       <DropdownMenuItem
                         className="gap-2 rounded-lg"
@@ -281,19 +254,6 @@ const AdminUsers = () => {
                             <UserCheck className="w-4 h-4" /> Activate
                           </>
                         )}
-                      </DropdownMenuItem>
-
-                      <DropdownMenuItem className="gap-2 rounded-lg">
-                        <Shield className="w-4 h-4" /> Change Role
-                      </DropdownMenuItem>
-
-                      <DropdownMenuSeparator />
-
-                      <DropdownMenuItem
-                        className="gap-2 rounded-lg text-destructive focus:text-destructive"
-                        onClick={() => setDeleteTarget(user)}
-                      >
-                        <Trash2 className="w-4 h-4" /> Delete User
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -311,14 +271,6 @@ const AdminUsers = () => {
           onPageChange={setPage}
         />
       )}
-
-      <ConfirmDeleteModal
-        open={!!deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete User"
-        description={`Are you sure you want to delete ${deleteTarget?.name}? This action cannot be undone.`}
-        onConfirm={handleDelete}
-      />
     </div>
   );
 };

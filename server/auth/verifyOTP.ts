@@ -2,6 +2,7 @@
 
 import { OTP } from "@/models/OTP";
 import { User } from "@/models/User";
+import Notification from "@/models/Notification";
 import connectDB from "@/lib/mongodb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
@@ -71,9 +72,20 @@ export const verifyOTP = async ({ otp }: VerifyOTPInput) => {
     /* =======================
        VERIFY USER
     ======================= */
-    await User.findByIdAndUpdate(userId, {
-      isVerified: true,
-    });
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { isVerified: true },
+      { new: true }
+    );
+
+    if (user && user.role === "DOCTOR") {
+      await Notification.create({
+        type: "user",
+        title: "New User Registration",
+        message: `Dr. ${user.firstname} ${user.lastname} has registered as a doctor and is awaiting approval.`,
+        read: false,
+      });
+    }
 
     return {
       success: true,

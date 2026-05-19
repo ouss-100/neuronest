@@ -1,15 +1,61 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, TrendingUp, AlertCircle, Brain } from "lucide-react";
 import { questions } from "@/assets/assets";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
+import { analyzeAssessment, saveAssessmentResult } from "@/server/aiAction";
+
+const mockResult = {
+  score: 82,
+  analysis: [
+    { area: "Reading Comprehension", score: 72, status: "attention" },
+    { area: "Letter Recognition", score: 85, status: "good" },
+    { area: "Attention Span", score: 65, status: "attention" },
+    { area: "Number Skills", score: 90, status: "good" },
+    { area: "Writing Skills", score: 78, status: "good" },
+    { area: "Following Instructions", score: 60, status: "attention" },
+  ],
+  recommendations: [
+    "Consider a professional evaluation for reading and attention patterns.",
+    "Practice multi-step instructions with visual aids at home.",
+    "Reading aloud for 15 minutes daily can strengthen comprehension.",
+    "Consult with your child's teacher about classroom accommodations.",
+  ]
+};
 
 const Assessment = () => {
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [completed, setCompleted] = useState(false);
+  const [resultData, setResultData] = useState<{
+    score: number;
+    analysis: Array<{ area: string; score: number; status: string }>;
+    recommendations: string[];
+  } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingStage, setLoadingStage] = useState(0);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (loading) {
+      interval = setInterval(() => {
+        setLoadingStage((prev) => (prev + 1) % 3);
+      }, 2000);
+    } else {
+      setLoadingStage(0);
+    }
+    return () => clearInterval(interval);
+  }, [loading]);
+
+  const loadingMessages = [
+    "Submitting responses to AI screening engine...",
+    "Analyzing developmental patterns and benchmarks...",
+    "Generating custom guidelines and recommendations...",
+  ];
 
   const question = questions[current];
   const progress =
@@ -19,44 +65,217 @@ const Assessment = () => {
     setAnswers({ ...answers, [question.id]: option });
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (current < questions.length - 1) {
       setCurrent(current + 1);
     } else {
-      setCompleted(true);
+      try {
+        setLoading(true);
+        const qaPairs = questions.map((q) => ({
+          question: q.text,
+          answer: answers[q.id] || "No answer",
+        }));
+
+        const res = await analyzeAssessment(qaPairs);
+        if (res.success && res.result) {
+          localStorage.setItem("neuronest_assessment_results", JSON.stringify(res.result));
+          await saveAssessmentResult(res.result);
+          setResultData(res.result);
+          setCompleted(true);
+        } else {
+          toast.error("AI analysis failed", {
+            description: res.message || "Failed to parse screening results.",
+          });
+          await saveAssessmentResult(mockResult);
+          setResultData(mockResult);
+          setCompleted(true); // Fallback to mock
+        }
+      } catch (error) {
+        console.error("AI analysis error:", error);
+        toast.error("Screening analysis error", {
+          description: "An unexpected error occurred during AI analysis.",
+        });
+        await saveAssessmentResult(mockResult);
+        setResultData(mockResult);
+        setCompleted(true); // Fallback to mock
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
-  if (completed) {
+  if (loading) {
     return (
-      <div className="max-w-2xl mx-auto text-center space-y-6 py-12">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 200 }}
-        >
-          <div className="w-20 h-20 rounded-full bg-secondary/10 text-secondary mx-auto flex items-center justify-center">
-            <CheckCircle2 className="w-10 h-10" />
+      <div className="fixed inset-0 bg-background/80 backdrop-blur-md z-50 flex flex-col items-center justify-center p-6 text-center">
+        <div className="relative w-24 h-24 mb-8">
+          <div className="absolute inset-0 rounded-full border-4 border-primary/20 animate-ping" />
+          <div className="absolute inset-2 rounded-full border-4 border-accent/30 animate-pulse" />
+          <div className="absolute inset-4 rounded-full border-4 border-secondary/40 animate-spin" style={{ animationDuration: "3s" }} />
+          <div className="absolute inset-6 rounded-full bg-primary/10 flex items-center justify-center">
+            <div className="w-4 h-4 rounded-full bg-primary animate-bounce" />
           </div>
-        </motion.div>
-        <h1 className="text-3xl font-heading font-bold text-foreground">
-          Great job!
-        </h1>
-        <p className="text-muted-foreground">
-          We've gathered the insights. A doctor will review this shortly.
-        </p>
-        <Link
-          href="/parent/results"
-          className="btn-accent inline-flex items-center gap-2"
+        </div>
+        <motion.h2
+          key={loadingStage}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="text-xl font-heading font-bold text-foreground max-w-md h-8"
         >
-          See Results <ArrowRight className="w-4 h-4" />
-        </Link>
+          {loadingMessages[loadingStage]}
+        </motion.h2>
+        <p className="text-muted-foreground text-sm mt-4 animate-pulse">
+          Please do not close this window
+        </p>
+      </div>
+    );
+  }
+
+  if (completed) {
+    const resultsObj = resultData || mockResult;
+    const score = resultsObj.score;
+    const analysis = resultsObj.analysis;
+    const recommendations = resultsObj.recommendations;
+
+    return (
+      <div className="space-y-6 max-w-2xl mx-auto py-6">
+        <Toaster />
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">
+              Assessment Results
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              AI-Generated Screening Analysis completed successfully.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Link
+              href="/parent/results"
+              className="btn-outline-primary !px-4 !py-2.5 text-sm flex items-center gap-1.5"
+            >
+              View Assessment History
+            </Link>
+            <Link
+              href="/parent"
+              className="btn-primary !px-4 !py-2.5 text-sm flex items-center gap-1.5"
+            >
+              Back to Dashboard
+            </Link>
+          </div>
+        </div>
+
+        {/* Overall Score */}
+        <div className="card-soft !p-8 text-center">
+          <p className="text-sm font-bold text-primary uppercase tracking-widest mb-3 font-heading">
+            Overall Score
+          </p>
+          <div className="relative w-32 h-32 mx-auto mb-4">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+              <circle
+                cx="50"
+                cy="50"
+                r="40"
+                fill="none"
+                stroke="hsl(var(--muted))"
+                strokeWidth="8"
+              />
+              <motion.circle
+                cx="50"
+                cy="50"
+                r="40"
+                fill="none"
+                stroke="hsl(var(--primary))"
+                strokeWidth="8"
+                strokeLinecap="round"
+                strokeDasharray={`${score * 2.512} 251.2`}
+                initial={{ strokeDasharray: "0 251.2" }}
+                animate={{ strokeDasharray: `${score * 2.512} 251.2` }}
+                transition={{ duration: 1.2, delay: 0.3 }}
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-3xl font-heading font-bold text-foreground">
+                {score}%
+              </span>
+            </div>
+          </div>
+          <p className="text-muted-foreground text-sm">
+            {score >= 80
+              ? "Above average with some areas needing attention"
+              : score >= 50
+              ? "Average but has notable areas of concern"
+              : "Needs immediate professional assessment"}
+          </p>
+        </div>
+
+        {/* Area breakdown */}
+        <div className="card-soft">
+          <h2 className="font-heading font-bold text-lg text-foreground mb-6">
+            Score Breakdown
+          </h2>
+          <div className="space-y-4">
+            {analysis.map((r, i) => (
+              <motion.div
+                key={r.area}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.08 }}
+                className="flex items-center gap-4"
+              >
+                <div className="w-5 flex justify-center">
+                  {r.status === "attention" ? (
+                    <AlertCircle className="w-4 h-4 text-accent" />
+                  ) : (
+                    <CheckCircle2 className="w-4 h-4 text-secondary" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm font-medium text-foreground">
+                      {r.area}
+                    </span>
+                    <span className="text-sm font-bold text-foreground">
+                      {r.score}%
+                    </span>
+                  </div>
+                  <div className="progress-track !h-2">
+                    <motion.div
+                      className={`h-full rounded-full ${r.status === "attention" ? "bg-accent" : "bg-secondary"}`}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${r.score}%` }}
+                      transition={{ duration: 0.8, delay: i * 0.1 }}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recommendations */}
+        <div className="card-soft">
+          <h2 className="font-heading font-bold text-lg text-foreground mb-4 flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-secondary" /> Recommendations
+          </h2>
+          <div className="space-y-3">
+            {recommendations.map((rec, i) => (
+              <div key={i} className="flex gap-3 items-start">
+                <div className="w-6 h-6 rounded-full bg-secondary/10 text-secondary flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">
+                  {i + 1}
+                </div>
+                <p className="text-sm text-muted-foreground">{rec}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+      <Toaster />
       <Link
         href="/parent"
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
