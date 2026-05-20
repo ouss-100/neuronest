@@ -117,15 +117,12 @@ export default function DashboardClient({
       { label: "Children", icon: Baby, to: "/parent/child-profile" },
       { label: "Assessment", icon: ClipboardList, to: "/parent/assessment" },
       { label: "Results", icon: BarChart3, to: "/parent/results" },
-      {
-        label: "Doctor Notes",
-        icon: Stethoscope,
-        to: "/parent/recommendations",
-      },
+      { label: "Find a Doctor", icon: Stethoscope, to: "/parent/find-doctor" },
+      { label: "Appointments", icon: Calendar, to: "/parent/appointments" },
+      { label: "Rapports", icon: FileText, to: "/parent/rapports" },
     ],
     doctor: [
       { label: "Dashboard", icon: LayoutDashboard, to: "/doctor" },
-      { label: "Evaluations", icon: ClipboardList, to: "/doctor/evaluation" },
       { label: "Reports", icon: FileText, to: "/doctor/reports" },
       { label: "Appointments", icon: Calendar, to: "/doctor/appointments" },
     ],
