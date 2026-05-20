@@ -4,6 +4,9 @@ import connectDB from "@/lib/mongodb";
 import { Appointment, AppointmentStatus } from "@/models/Appointment";
 import { createDraftRapport } from "./rapportActions";
 import mongoose from "mongoose";
+import "@/models/Child"; // Ensure Child schema is registered for populate
+import "@/models/Doctor"; // Ensure Doctor schema is registered
+import "@/models/User"; // Ensure User schema is registered
 
 /* =======================
    BOOK APPOINTMENT

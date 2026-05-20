@@ -3,6 +3,10 @@
 import connectDB from "@/lib/mongodb";
 import { Rapport } from "@/models/Rapport";
 import mongoose from "mongoose";
+import "@/models/Child"; // Ensure Child schema is registered for populate
+import "@/models/Doctor"; // Ensure Doctor schema is registered
+import "@/models/User"; // Ensure User schema is registered
+import "@/models/Appointment"; // Ensure Appointment schema is registered
 
 /* =======================
    CREATE RAPPORT
