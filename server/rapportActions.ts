@@ -46,12 +46,87 @@ export const createRapport = async (data: {
 };
 
 /* =======================
+   CREATE DRAFT RAPPORT
+======================= */
+export const createDraftRapport = async (data: {
+  doctorId: string;
+  childId: string;
+  appointmentId: string;
+  description: string;
+}) => {
+  try {
+    await connectDB();
+
+    if (!data.doctorId || !data.childId || !data.appointmentId || !data.description) {
+      return { success: false, message: "Missing required fields for draft" };
+    }
+
+    const newDraft = await Rapport.create({
+      doctorId: new mongoose.Types.ObjectId(data.doctorId),
+      childId: new mongoose.Types.ObjectId(data.childId),
+      appointmentId: new mongoose.Types.ObjectId(data.appointmentId),
+      title: "Assessment Report (Draft)",
+      description: data.description,
+      isDraft: true,
+    });
+
+    return { 
+      success: true, 
+      message: "Draft rapport created", 
+      rapport: JSON.parse(JSON.stringify(newDraft)) 
+    };
+  } catch (error) {
+    console.error("Error creating draft rapport:", error);
+    return { success: false, message: "Failed to create draft rapport" };
+  }
+};
+
+/* =======================
+   UPDATE RAPPORT
+======================= */
+export const updateRapport = async (
+  rapportId: string,
+  data: Partial<typeof Rapport.prototype>
+) => {
+  try {
+    await connectDB();
+
+    // Prevent overwriting references by accident, but allow completing the rest
+    const { doctorId, childId, appointmentId, ...updateFields } = data as any;
+    
+    if (updateFields.nextVisitDate) {
+      updateFields.nextVisitDate = new Date(updateFields.nextVisitDate);
+    }
+
+    const updatedRapport = await Rapport.findByIdAndUpdate(
+      rapportId,
+      { $set: updateFields },
+      { new: true }
+    );
+
+    if (!updatedRapport) {
+      return { success: false, message: "Rapport not found" };
+    }
+
+    return { 
+      success: true, 
+      message: "Rapport updated successfully", 
+      rapport: JSON.parse(JSON.stringify(updatedRapport)) 
+    };
+  } catch (error) {
+    console.error("Error updating rapport:", error);
+    return { success: false, message: "Failed to update rapport" };
+  }
+};
+
+
+/* =======================
    GET RAPPORTS BY CHILD
 ======================= */
 export const getRapportsByChild = async (childId: string) => {
   try {
     await connectDB();
-    const rapports = await Rapport.find({ childId })
+    const rapports = await Rapport.find({ childId, isDraft: { $ne: true } })
       .populate("doctorId", "firstname lastname specialty")
       .sort({ createdAt: -1 });
       
@@ -70,6 +145,7 @@ export const getRapportsByDoctor = async (doctorId: string) => {
     await connectDB();
     const rapports = await Rapport.find({ doctorId })
       .populate("childId", "age symptoms")
+      .populate("appointmentId", "appointmentDate")
       .sort({ createdAt: -1 });
       
     return { success: true, rapports: JSON.parse(JSON.stringify(rapports)) };

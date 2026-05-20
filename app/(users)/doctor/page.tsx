@@ -6,7 +6,7 @@ import { Users, ClipboardList, Bell, Calendar, ArrowRight, TrendingUp, Clock, Se
 import Link from "next/link";
 import StatCard from "@/components/StatCard";
 import { getDoctorDashboardStats } from "@/server/dashboardActions";
-import { MOCK_DOCTOR_ID } from "@/lib/constants";
+import { useSession } from "next-auth/react";
 
 type FilterType = "all" | "pending" | "completed";
 
@@ -15,18 +15,20 @@ export default function DoctorDashboard() {
   const [search, setSearch] = useState("");
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
 
   useEffect(() => {
     async function loadStats() {
+      if (!session?.user?.id) return;
       setLoading(true);
-      const res = await getDoctorDashboardStats(MOCK_DOCTOR_ID);
+      const res = await getDoctorDashboardStats(session.user.id);
       if (res.success) {
         setStats(res.stats);
       }
       setLoading(false);
     }
     loadStats();
-  }, []);
+  }, [session?.user?.id]);
 
   const filteredChildren = stats?.children?.filter((c: any) => {
     const matchesFilter = filter === "all" || c.status === filter;

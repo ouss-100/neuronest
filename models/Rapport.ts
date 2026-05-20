@@ -5,18 +5,22 @@ export interface IRapport extends Document {
   doctorId: mongoose.Types.ObjectId;
   childId: mongoose.Types.ObjectId;
 
+  appointmentId?: mongoose.Types.ObjectId;
+
   title: string;
   description: string;
 
-  diagnosis: string;
-  notes: string;
+  diagnosis?: string;
+  notes?: string;
 
-  recommendations: string;
+  recommendations?: string;
   medications?: string;
   exercises?: string;
 
 
   nextVisitDate?: Date;
+
+  isDraft: boolean;
 
   createdAt: Date;
   updatedAt: Date;
@@ -36,6 +40,11 @@ const RapportSchema = new Schema<IRapport>(
       required: true,
       index: true,
     },
+    appointmentId: {
+      type: Schema.Types.ObjectId,
+      ref: "Appointment",
+      index: true,
+    },
 
     title: {
       type: String,
@@ -49,7 +58,6 @@ const RapportSchema = new Schema<IRapport>(
 
     diagnosis: {
       type: String,
-      required: true,
     },
     notes: {
       type: String,
@@ -57,7 +65,6 @@ const RapportSchema = new Schema<IRapport>(
 
     recommendations: {
       type: String,
-      required: true,
     },
     medications: {
       type: String,
@@ -68,6 +75,11 @@ const RapportSchema = new Schema<IRapport>(
 
     nextVisitDate: {
       type: Date,
+    },
+
+    isDraft: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true }

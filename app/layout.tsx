@@ -5,6 +5,7 @@ import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import { cn } from "@/lib/utils";
 import AuthSessionProvider from "@/lib/session-provider";
+import { Toaster } from "react-hot-toast";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -38,7 +39,10 @@ export default function RootLayout({
     >
       <body className={`${inter.variable} ${plusJakarta.variable} antialiased`}>
         <AuthSessionProvider>
-          <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
+          <ThemeProviderWrapper>
+            {children}
+            <Toaster position="top-right" />
+          </ThemeProviderWrapper>
         </AuthSessionProvider>
       </body>
     </html>

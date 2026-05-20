@@ -18,7 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { getAppointmentsByDoctor, updateAppointmentStatus } from "@/server/appointmentActions";
-import { MOCK_DOCTOR_ID } from "@/lib/constants";
+import { toast } from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 type FilterType = "all" | "confirmed" | "pending" | "cancelled" | "completed";
 
@@ -29,10 +30,12 @@ export default function DoctorAppointments() {
   const [search, setSearch] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const { data: session } = useSession();
 
   const fetchAppointments = useCallback(async () => {
+    if (!session?.user?.id) return;
     setLoading(true);
-    const res = await getAppointmentsByDoctor(MOCK_DOCTOR_ID);
+    const res = await getAppointmentsByDoctor(session.user.id);
     if (res.success) {
       setAppointments(
         (res.appointments || []).map((a: any) => ({
@@ -42,13 +45,26 @@ export default function DoctorAppointments() {
       );
     }
     setLoading(false);
-  }, []);
+  }, [session?.user?.id]);
 
-  useEffect(() => { fetchAppointments(); }, [fetchAppointments]);
+  useEffect(() => { 
+    if (session?.user?.id) {
+      fetchAppointments(); 
+    }
+  }, [fetchAppointments, session?.user?.id]);
 
   async function handleStatusChange(id: string, status: "confirmed" | "cancelled" | "completed") {
     setUpdatingId(id);
-    await updateAppointmentStatus(id, status);
+    const res = await updateAppointmentStatus(id, status);
+    
+    if (res.success && status === "confirmed") {
+      toast.success("Appointment confirmed. Draft report created — view in Reports.");
+    } else if (res.success) {
+      toast.success(`Appointment marked as ${status}.`);
+    } else {
+      toast.error(res.message || "Failed to update appointment");
+    }
+
     await fetchAppointments();
     setUpdatingId(null);
   }

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Star, MapPin, X, Calendar, Navigation, ShieldCheck } from "lucide-react";
+import { useSession } from "next-auth/react";
 import type { Doctor } from "@/types/doctor";
 import { bookAppointment } from "@/server/appointmentActions";
-import { MOCK_PARENT_ID } from "@/lib/constants";
 
 interface DoctorProfileProps {
   doctor: Doctor;
@@ -24,13 +24,14 @@ export default function DoctorProfile({ doctor, distance, onClose }: DoctorProfi
   const [bookingReason, setBookingReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const { data: session } = useSession();
 
   const handleBook = async () => {
     if (!bookingDate) return;
     setIsSubmitting(true);
     const res = await bookAppointment({
       doctorId: (doctor as any)._id || (doctor as any).id || "temp-doctor-id",
-      parentId: MOCK_PARENT_ID,
+      parentId: session?.user?.id || "",
       childId: undefined, // Let the backend default to the parent's child
       appointmentDate: new Date(bookingDate),
       reason: bookingReason || "Consultation",

@@ -2,6 +2,7 @@
 
 import connectDB from "@/lib/mongodb";
 import { Appointment, AppointmentStatus } from "@/models/Appointment";
+import { createDraftRapport } from "./rapportActions";
 import mongoose from "mongoose";
 
 /* =======================
@@ -107,6 +108,26 @@ export const updateAppointmentStatus = async (
 
     if (!updatedAppointment) {
       return { success: false, message: "Appointment not found" };
+    }
+
+    if (status === "confirmed") {
+      // Create a draft rapport
+      // Fetch the child's symptoms to pre-fill the description
+      const { Child } = await import("@/models/Child");
+      const child = await Child.findById(updatedAppointment.childId);
+      
+      let description = "Patient assessment.";
+      if (child && child.symptoms && child.symptoms.length > 0) {
+        const symptomsList = child.symptoms.map((s: any) => `- ${s.name}: ${s.description || "No details"}`).join("\n");
+        description = `Patient presented with the following symptoms:\n${symptomsList}`;
+      }
+
+      await createDraftRapport({
+        doctorId: updatedAppointment.doctorId.toString(),
+        childId: updatedAppointment.childId.toString(),
+        appointmentId: updatedAppointment._id.toString(),
+        description,
+      });
     }
 
     return { 
