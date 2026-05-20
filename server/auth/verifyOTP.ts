@@ -9,22 +9,16 @@ import { authOptions } from "@/lib/authOptions";
 
 interface VerifyOTPInput {
   otp: string;
+  userId: string;
 }
 
-export const verifyOTP = async ({ otp }: VerifyOTPInput) => {
+export const verifyOTP = async ({ otp, userId }: VerifyOTPInput) => {
   await connectDB();
 
   try {
-    /* =======================
-       GET USER FROM SESSION
-    ======================= */
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
+    if (!userId) {
       throw new Error("Unauthorized");
     }
-
-    const userId = session.user.id;
     const cleanOtp = otp.trim();
 
     /* =======================
@@ -75,7 +69,7 @@ export const verifyOTP = async ({ otp }: VerifyOTPInput) => {
     const user = await User.findByIdAndUpdate(
       userId,
       { isVerified: true },
-      { new: true }
+      { returnDocument: "after" }
     );
 
     if (user && user.role === "DOCTOR") {

@@ -8,12 +8,14 @@ import { ArrowRight } from "lucide-react";
 import { images } from "@/assets/assets";
 import { verifyOTP } from "@/server/auth/verifyOTP";
 import { resendOTP } from "@/server/auth/resendOTP";
-import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 
-const OTPVerification = () => {
+const OTPVerificationContent = () => {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const searchParams = useSearchParams();
+  const userId = searchParams.get("userId");
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -23,8 +25,10 @@ const OTPVerification = () => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    if (status === "loading") return;
-  }, [session, status, router]);
+    if (!userId) {
+      setMessage("User ID is missing from URL.");
+    }
+  }, [userId]);
 
   /* =======================
      AUTO FOCUS FIRST INPUT
@@ -64,13 +68,16 @@ const OTPVerification = () => {
      VERIFY OTP
   ======================= */
   const verifyOTPCode = async (code: string) => {
-    if (!session) return;
+    if (!userId) {
+      setMessage("User ID missing. Please register again.");
+      return;
+    }
 
     setIsVerifying(true);
     setMessage("");
 
     try {
-      const res = await verifyOTP({ otp: code }); // ✅ no userId
+      const res = await verifyOTP({ otp: code, userId }); // ✅ pass userId
       if (res.success) {
         setMessage("Email verified successfully!");
 
@@ -140,13 +147,13 @@ const OTPVerification = () => {
      RESEND OTP
   ======================= */
   const handleResend = async () => {
-    if (!session) return;
+    if (!userId) return;
 
     setMessage("");
     setOtp(["", "", "", "", "", ""]);
 
     try {
-      const res = await resendOTP(); // ✅ no userId
+      const res = await resendOTP(userId); // ✅ pass userId
 
       if (res.success) {
         setMessage("OTP resent!");
@@ -254,6 +261,14 @@ const OTPVerification = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const OTPVerification = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <OTPVerificationContent />
+    </Suspense>
   );
 };
 

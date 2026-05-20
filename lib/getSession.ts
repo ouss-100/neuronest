@@ -1,10 +1,7 @@
 import { authOptions } from "@/lib/authOptions";
 import { getServerSession } from "next-auth";
 
-const session = await getServerSession(authOptions);
-
-if (!session?.user?.id) {
-  throw new Error("Unauthorized");
+export default async function getSession() {
+  const session = await getServerSession(authOptions);
+  return session;
 }
-
-const userId = session.user.id;

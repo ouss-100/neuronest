@@ -10,21 +10,30 @@ import mongoose from "mongoose";
 export const bookAppointment = async (data: {
   parentId: string;
   doctorId: string;
-  childId: string;
+  childId?: string;
   appointmentDate: Date;
   reason?: string;
 }) => {
   try {
     await connectDB();
 
-    if (!data.parentId || !data.doctorId || !data.childId || !data.appointmentDate) {
+    if (!data.parentId || !data.doctorId || !data.appointmentDate) {
       return { success: false, message: "Missing required fields" };
+    }
+
+    let actualChildId = data.childId;
+    if (!actualChildId) {
+      // Find the first child of the parent
+      const { Child } = await import("@/models/Child");
+      const child = await Child.findOne({ parentId: data.parentId });
+      if (!child) return { success: false, message: "No child found for this parent" };
+      actualChildId = child._id.toString();
     }
 
     const newAppointment = await Appointment.create({
       parentId: new mongoose.Types.ObjectId(data.parentId),
       doctorId: new mongoose.Types.ObjectId(data.doctorId),
-      childId: new mongoose.Types.ObjectId(data.childId),
+      childId: new mongoose.Types.ObjectId(actualChildId),
       appointmentDate: new Date(data.appointmentDate),
       reason: data.reason,
       status: "pending",

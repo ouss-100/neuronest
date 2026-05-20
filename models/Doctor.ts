@@ -6,7 +6,6 @@ export interface IDoctor extends IUser {
   latitude: number;
   longitude: number;
   identityCard: string;
-  isActive: boolean;
 }
 
 const doctorSchema = new Schema<IDoctor>({

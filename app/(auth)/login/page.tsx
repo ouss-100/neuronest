@@ -21,10 +21,10 @@ const Login = () => {
   useEffect(() => {
     getSession().then((session) => {
       if (session?.user?.role) {
-        const role = session.user.role;
-        if (role === "admin") router.replace("/admin");
-        else if (role === "doctor") router.replace("/doctor");
-        else if (role === "parent") router.replace("/parent");
+        const role = session.user.role.toLowerCase();
+        if (role === "admin") window.location.href = "/admin";
+        else if (role === "doctor") window.location.href = "/doctor";
+        else if (role === "parent") window.location.href = "/parent";
       }
     });
   }, [router]);
@@ -43,16 +43,21 @@ const Login = () => {
     setLoading(false);
 
     if (result?.error) {
+      if (result.error.startsWith("unverified:")) {
+        const userId = result.error.split(":")[1];
+        router.push(`/OTP-verification?userId=${userId}`);
+        return;
+      }
       setError("Invalid email or password");
       return;
     }
 
     const session = await getSession();
-    const role = session?.user?.role;
+    const role = session?.user?.role?.toLowerCase();
 
-    if (role === "admin") router.push("/admin");
-    else if (role === "doctor") router.push("/doctor");
-    else if (role === "parent") router.push("/parent");
+    if (role === "admin") window.location.href = "/admin";
+    else if (role === "doctor") window.location.href = "/doctor";
+    else if (role === "parent") window.location.href = "/parent";
   };
 
   return (

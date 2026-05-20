@@ -127,7 +127,7 @@ const Register = () => {
       }
 
       // ✅ pass userId
-      router.push(`/OTP-verification`);
+      router.push(`/OTP-verification?userId=${res.userId}`);
     } catch (err: any) {
       setErrorMessage("Unexpected error");
     }

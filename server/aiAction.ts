@@ -5,6 +5,8 @@ import { authOptions } from "@/lib/authOptions";
 import connectDB from "@/lib/mongodb";
 import { Child } from "@/models/Child";
 import { Assessment } from "@/models/Assessment";
+import { MOCK_PARENT_ID } from "@/lib/constants";
+import { ensureMockUsers } from "@/lib/mockSession";
 
 export async function askDeepSeek(prompt: string, maxTokens = 1000) {
   const HF_TOKEN = process.env.HF_TOKEN;
@@ -102,12 +104,8 @@ You must respond ONLY with a valid JSON object. Do not include any explanations,
 export async function saveAssessmentResult(result: { score: number; analysis: any[]; recommendations: string[] }) {
   try {
     await connectDB();
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return { success: false, message: "Unauthorized" };
-    }
-
-    const parentId = session.user.id;
+    await ensureMockUsers();
+    const parentId = MOCK_PARENT_ID;
 
     // Find or create child
     let child = await Child.findOne({ parentId });
@@ -139,12 +137,8 @@ export async function saveAssessmentResult(result: { score: number; analysis: an
 export async function getParentAssessments() {
   try {
     await connectDB();
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return { success: false, message: "Unauthorized" };
-    }
-
-    const parentId = session.user.id;
+    await ensureMockUsers();
+    const parentId = MOCK_PARENT_ID;
 
     // Find children for this parent
     let children = await Child.find({ parentId });

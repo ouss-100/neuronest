@@ -32,6 +32,10 @@ export const authOptions: AuthOptions = {
         );
         if (!isValid) return null;
 
+        if (!user.isVerified) {
+          throw new Error(`unverified:${user._id.toString()}`);
+        }
+
         return {
           id: user._id.toString(),
           name: `${user.firstname} ${user.lastname}`,

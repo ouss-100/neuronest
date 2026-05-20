@@ -26,11 +26,12 @@ export const createRapport = async (data: {
       return { success: false, message: "Missing required fields" };
     }
 
+    const { doctorId, childId, nextVisitDate, ...rest } = data;
     const newRapport = await Rapport.create({
-      doctorId: new mongoose.Types.ObjectId(data.doctorId),
-      childId: new mongoose.Types.ObjectId(data.childId),
-      ...data,
-      nextVisitDate: data.nextVisitDate ? new Date(data.nextVisitDate) : undefined,
+      doctorId: new mongoose.Types.ObjectId(doctorId),
+      childId: new mongoose.Types.ObjectId(childId),
+      ...rest,
+      nextVisitDate: nextVisitDate ? new Date(nextVisitDate) : undefined,
     });
 
     return { 

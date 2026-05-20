@@ -22,6 +22,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated";
+  const userRole = session?.user?.role;
+  const dashboardHref = userRole ? `/${userRole.toLowerCase()}` : "/dashboard";
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
@@ -77,7 +79,7 @@ export default function Navbar() {
           ) : (
             <>
               <Link
-                href="/dashboard"
+                href={dashboardHref}
                 className="btn-outline-primary !px-5 !py-2.5 text-sm"
               >
                 Dashboard
@@ -156,7 +158,7 @@ export default function Navbar() {
                 ) : (
                   <>
                     <Link
-                      href="/dashboard"
+                      href={dashboardHref}
                       className="btn-outline-primary !px-5 !py-2.5 text-sm flex-1 text-center"
                     >
                       Dashboard

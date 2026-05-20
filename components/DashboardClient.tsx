@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   Users,
@@ -79,6 +80,10 @@ export default function DashboardClient({
   const unreadCount = mockNotifications.filter((n) => n.unread).length;
 
   const navigate = (path: string) => router.push(path);
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/login" });
+  };
 
   const handleResize = (e: MouseEvent) => {
     const newWidth = e.clientX;
@@ -168,7 +173,7 @@ export default function DashboardClient({
 
         <div className="border-t">
           <button
-            onClick={() => router.push("/login")}
+            onClick={handleLogout}
             className="w-full p-4 flex gap-2 text-muted-foreground hover:bg-muted"
           >
             <LogOut className="w-5 h-5" />
@@ -278,7 +283,7 @@ export default function DashboardClient({
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/login")}>
+                <DropdownMenuItem onClick={handleLogout}>
                   Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>

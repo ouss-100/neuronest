@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
-import type { Doctor } from "@/data/doctors";
+import type { Doctor } from "@/types/doctor";
 
 // Fix default marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;

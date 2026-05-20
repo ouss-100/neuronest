@@ -1,16 +1,23 @@
+"use client";
+
 import { motion } from "framer-motion";
 import { Save, User, Bell, Mail, Phone, MapPin, Shield, Key } from "lucide-react";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
+import { getParentProfile, updateParentProfile } from "@/server/profileActions";
+import { MOCK_PARENT_ID } from "@/lib/constants";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
+import { Button } from "@/components/ui/button";
 
-const ParentSettings = () => {
-  const { toast } = useToast();
-
+export default function ParentSettings() {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState({
-    fullName: "Sarah Johnson",
-    email: "sarah.johnson@email.com",
-    phone: "+1 555 123 4567",
-    location: "Austin, TX",
+    firstname: "",
+    lastname: "",
+    email: "",
+    phone: "",
+    location: "",
     relationship: "Mother",
   });
 
@@ -23,6 +30,25 @@ const ParentSettings = () => {
     marketingEmails: false,
   });
 
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      const res = await getParentProfile(MOCK_PARENT_ID);
+      if (res.success && res.parent) {
+        setProfile({
+          firstname: res.parent.firstname || "",
+          lastname: res.parent.lastname || "",
+          email: res.parent.email || "",
+          phone: res.parent.phone?.number || "",
+          location: "Austin, TX", // static for now as it's not in schema
+          relationship: "Mother", // static
+        });
+      }
+      setLoading(false);
+    }
+    load();
+  }, []);
+
   const handleProfileChange = (field: string, value: string) => {
     setProfile((prev) => ({ ...prev, [field]: value }));
   };
@@ -31,8 +57,20 @@ const ParentSettings = () => {
     setNotifications((prev) => ({ ...prev, [field]: !prev[field as keyof typeof prev] }));
   };
 
-  const handleSave = () => {
-    toast({ title: "Settings saved", description: "Your preferences have been updated." });
+  const handleSave = async () => {
+    setSaving(true);
+    const res = await updateParentProfile(MOCK_PARENT_ID, {
+      firstname: profile.firstname,
+      lastname: profile.lastname,
+      email: profile.email,
+      phone: { countryCode: "+1", number: profile.phone },
+    });
+    setSaving(false);
+    if (res.success) {
+      toast.success("Settings saved", { description: "Your preferences have been updated." });
+    } else {
+      toast.error("Error", { description: "Failed to update profile." });
+    }
   };
 
   const Toggle = ({ checked, onToggle }: { checked: boolean; onToggle: () => void }) => (
@@ -53,8 +91,17 @@ const ParentSettings = () => {
     { key: "marketingEmails", label: "Updates & Newsletters", desc: "Product updates and educational newsletters" },
   ];
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <div className="w-8 h-8 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      <Toaster />
       <div>
         <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">Settings</h1>
         <p className="text-muted-foreground mt-1">Manage your profile and notification preferences</p>
@@ -71,10 +118,10 @@ const ParentSettings = () => {
 
         <div className="flex items-center gap-4 p-4 rounded-2xl bg-muted/30">
           <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl font-bold font-heading">
-            SJ
+            {profile.firstname?.[0]}{profile.lastname?.[0]}
           </div>
           <div>
-            <p className="font-heading font-semibold text-foreground">{profile.fullName}</p>
+            <p className="font-heading font-semibold text-foreground">{profile.firstname} {profile.lastname}</p>
             <p className="text-sm text-muted-foreground">{profile.relationship}</p>
             <button className="text-xs text-primary font-medium mt-1 hover:underline">Change Photo</button>
           </div>
@@ -82,8 +129,12 @@ const ParentSettings = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-muted-foreground" /> Full Name</label>
-            <input className="input-soft" value={profile.fullName} onChange={(e) => handleProfileChange("fullName", e.target.value)} />
+            <label className="text-sm font-medium text-foreground flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-muted-foreground" /> First Name</label>
+            <input className="input-soft" value={profile.firstname} onChange={(e) => handleProfileChange("firstname", e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-muted-foreground" /> Last Name</label>
+            <input className="input-soft" value={profile.lastname} onChange={(e) => handleProfileChange("lastname", e.target.value)} />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-muted-foreground" /> Email</label>
@@ -164,12 +215,11 @@ const ParentSettings = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
         onClick={handleSave}
+        disabled={saving}
         className="btn-accent flex items-center gap-2"
       >
-        <Save className="w-4 h-4" /> Save Changes
+        <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save Changes"}
       </motion.button>
     </div>
   );
-};
-
-export default ParentSettings;
+}

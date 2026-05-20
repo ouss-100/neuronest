@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, CheckCircle2, TrendingUp, AlertCircle, Brain } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, TrendingUp, AlertCircle, Brain, Stethoscope } from "lucide-react";
 import { questions } from "@/assets/assets";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
@@ -138,7 +138,7 @@ const Assessment = () => {
     const recommendations = resultsObj.recommendations;
 
     return (
-      <div className="space-y-6 max-w-2xl mx-auto py-6">
+      <div className="space-y-6">
         <Toaster />
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
           <div>
@@ -149,7 +149,14 @@ const Assessment = () => {
               AI-Generated Screening Analysis completed successfully.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap sm:flex-nowrap">
+            <Link
+              href="/parent/doctors"
+              className="btn-accent !px-4 !py-2.5 text-sm flex items-center gap-1.5"
+            >
+              <Stethoscope className="w-4 h-4" />
+              Find a Specialist
+            </Link>
             <Link
               href="/parent/results"
               className="btn-outline-primary !px-4 !py-2.5 text-sm flex items-center gap-1.5"
@@ -204,8 +211,8 @@ const Assessment = () => {
             {score >= 80
               ? "Above average with some areas needing attention"
               : score >= 50
-              ? "Average but has notable areas of concern"
-              : "Needs immediate professional assessment"}
+                ? "Average but has notable areas of concern"
+                : "Needs immediate professional assessment"}
           </p>
         </div>
 
@@ -269,6 +276,24 @@ const Assessment = () => {
             ))}
           </div>
         </div>
+
+        {/* Call to Action: Consult a Specialist */}
+        <div className="card-soft border border-primary/20 bg-primary/5 flex flex-col md:flex-row items-center justify-between gap-6 p-6">
+          <div className="space-y-1 text-center md:text-left">
+            <h3 className="font-heading font-bold text-base text-foreground flex items-center justify-center md:justify-start gap-2">
+              <Brain className="w-5 h-5 text-primary" /> Need a Professional Evaluation?
+            </h3>
+            <p className="text-xs text-muted-foreground max-w-md">
+              Connect with certified child psychologists, pediatric neurologists, and speech therapists in your area.
+            </p>
+          </div>
+          <Link
+            href="/parent/doctors"
+            className="btn-accent !px-5 !py-2.5 text-sm flex items-center gap-1.5 shrink-0"
+          >
+            <Stethoscope className="w-4 h-4" /> Find Specialists Nearby
+          </Link>
+        </div>
       </div>
     );
   }
@@ -313,11 +338,10 @@ const Assessment = () => {
                 <button
                   key={option}
                   onClick={() => handleAnswer(option)}
-                  className={`w-full p-5 text-left rounded-2xl border-2 transition-all duration-300 flex justify-between items-center group ${
-                    answers[question.id] === option
+                  className={`w-full p-5 text-left rounded-2xl border-2 transition-all duration-300 flex justify-between items-center group ${answers[question.id] === option
                       ? "border-primary bg-primary/5"
                       : "border-border/50 hover:border-primary/30 hover:bg-primary/5"
-                  }`}
+                    }`}
                   style={{
                     transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
                   }}
@@ -326,11 +350,10 @@ const Assessment = () => {
                     {option}
                   </span>
                   <div
-                    className={`w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center ${
-                      answers[question.id] === option
+                    className={`w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center ${answers[question.id] === option
                         ? "border-primary bg-primary"
                         : "border-muted-foreground/30"
-                    }`}
+                      }`}
                   >
                     {answers[question.id] === option && (
                       <div className="w-2.5 h-2.5 rounded-full bg-primary-foreground" />

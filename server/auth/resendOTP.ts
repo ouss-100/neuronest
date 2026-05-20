@@ -8,7 +8,7 @@ import { sendOTPEmail } from "@/lib/mailer";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 
-export const resendOTP = async () => {
+export const resendOTP = async (userId: string) => {
   await connectDB();
 
   const dbSession = await mongoose.startSession();
@@ -16,16 +16,9 @@ export const resendOTP = async () => {
   try {
     dbSession.startTransaction();
 
-    /* =======================
-       GET USER FROM SESSION
-    ======================= */
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
+    if (!userId) {
       throw new Error("Unauthorized");
     }
-
-    const userId = session.user.id;
 
     /* =======================
        GET USER

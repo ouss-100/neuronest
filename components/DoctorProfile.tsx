@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { Star, MapPin, X, Calendar, Navigation, ShieldCheck } from "lucide-react";
-import type { Doctor } from "@/data/doctors";
+import type { Doctor } from "@/types/doctor";
+import { bookAppointment } from "@/server/appointmentActions";
+import { MOCK_PARENT_ID } from "@/lib/constants";
 
 interface DoctorProfileProps {
   doctor: Doctor;
@@ -16,6 +19,27 @@ const specialtyConfig: Record<string, { bg: string; text: string; emoji: string 
 
 export default function DoctorProfile({ doctor, distance, onClose }: DoctorProfileProps) {
   const config = specialtyConfig[doctor.specialty] || { bg: "bg-primary/8", text: "text-primary", emoji: "🩺" };
+  const [isBooking, setIsBooking] = useState(false);
+  const [bookingDate, setBookingDate] = useState("");
+  const [bookingReason, setBookingReason] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
+
+  const handleBook = async () => {
+    if (!bookingDate) return;
+    setIsSubmitting(true);
+    const res = await bookAppointment({
+      doctorId: (doctor as any)._id || (doctor as any).id || "temp-doctor-id",
+      parentId: MOCK_PARENT_ID,
+      childId: undefined, // Let the backend default to the parent's child
+      appointmentDate: new Date(bookingDate),
+      reason: bookingReason || "Consultation",
+    });
+    if (res.success) {
+      setBookingSuccess(true);
+    }
+    setIsSubmitting(false);
+  };
 
   return (
     <div className="absolute bottom-4 left-4 right-4 z-[1000] animate-[slideUp_0.35s_ease-out]">
@@ -56,16 +80,57 @@ export default function DoctorProfile({ doctor, distance, onClose }: DoctorProfi
           <span>Verified specialist · Experienced with children</span>
         </div>
 
-        <div className="flex gap-3 mt-4">
-          <button className="btn-primary flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm">
-            <Calendar className="h-4 w-4" />
-            Book Appointment
-          </button>
-          <button className="btn-outline-primary flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm">
-            <Navigation className="h-4 w-4" />
-            Get Directions
-          </button>
-        </div>
+        {isBooking ? (
+          <div className="mt-4 pt-4 border-t border-border/50">
+            {bookingSuccess ? (
+              <div className="text-center py-4 space-y-2">
+                <ShieldCheck className="h-10 w-10 text-secondary mx-auto" />
+                <p className="font-bold text-foreground">Appointment Requested!</p>
+                <p className="text-xs text-muted-foreground">The doctor will review your request.</p>
+                <button onClick={onClose} className="btn-outline-primary w-full mt-2 text-sm py-2">Close</button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-semibold text-foreground mb-1 block">Date & Time</label>
+                  <input
+                    type="datetime-local"
+                    value={bookingDate}
+                    onChange={(e) => setBookingDate(e.target.value)}
+                    className="w-full text-sm rounded-xl border border-border/50 p-2 bg-background text-foreground"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-foreground mb-1 block">Reason (Optional)</label>
+                  <input
+                    type="text"
+                    value={bookingReason}
+                    onChange={(e) => setBookingReason(e.target.value)}
+                    placeholder="e.g. Follow-up consultation"
+                    className="w-full text-sm rounded-xl border border-border/50 p-2 bg-background text-foreground"
+                  />
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <button onClick={() => setIsBooking(false)} className="btn-outline-primary flex-1 text-sm py-2">Cancel</button>
+                  <button onClick={handleBook} disabled={isSubmitting || !bookingDate} className="btn-accent flex-1 text-sm py-2 flex items-center justify-center">
+                    {isSubmitting ? "..." : "Confirm Booking"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex gap-3 mt-4">
+            <button onClick={() => setIsBooking(true)} className="btn-primary flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm">
+              <Calendar className="h-4 w-4" />
+              Book Appointment
+            </button>
+            <button className="btn-outline-primary flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm">
+              <Navigation className="h-4 w-4" />
+              Get Directions
+            </button>
+          </div>
+        )}
       </div>
 
       <style>{`

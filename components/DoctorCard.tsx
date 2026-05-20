@@ -1,5 +1,5 @@
 import { Star, MapPin, Heart } from "lucide-react";
-import type { Doctor } from "@/data/doctors";
+import type { Doctor } from "@/types/doctor";
 
 interface DoctorCardProps {
   doctor: Doctor;

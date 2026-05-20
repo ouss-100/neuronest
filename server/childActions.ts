@@ -41,7 +41,7 @@ export const getChildById = async (childId: string) => {
 export const addChild = async (data: { parentId: string; age: number; symptoms?: Omit<ISymptom, "createdAt">[] }) => {
   try {
     await connectDB();
-    
+
     if (!data.parentId || data.age === undefined) {
       return { success: false, message: "Parent ID and age are required" };
     }

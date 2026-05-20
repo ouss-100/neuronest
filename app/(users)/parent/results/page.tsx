@@ -26,46 +26,7 @@ interface AssessmentResult {
   createdAt: string;
 }
 
-// Fallback items in database style to keep UI premium if database is empty
-const mockAssessments: AssessmentResult[] = [
-  {
-    _id: "mock-1",
-    score: 82,
-    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    analysis: [
-      { area: "Reading Comprehension", score: 72, status: "attention" },
-      { area: "Letter Recognition", score: 85, status: "good" },
-      { area: "Attention Span", score: 65, status: "attention" },
-      { area: "Number Skills", score: 90, status: "good" },
-      { area: "Writing Skills", score: 78, status: "good" },
-      { area: "Following Instructions", score: 60, status: "attention" },
-    ],
-    recommendations: [
-      "Consider a professional evaluation for reading and attention patterns.",
-      "Practice multi-step instructions with visual aids at home.",
-      "Reading aloud for 15 minutes daily can strengthen comprehension.",
-      "Consult with your child's teacher about classroom accommodations.",
-    ]
-  },
-  {
-    _id: "mock-2",
-    score: 65,
-    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    analysis: [
-      { area: "Reading Comprehension", score: 58, status: "attention" },
-      { area: "Letter Recognition", score: 70, status: "good" },
-      { area: "Attention Span", score: 52, status: "attention" },
-      { area: "Number Skills", score: 80, status: "good" },
-      { area: "Writing Skills", score: 65, status: "attention" },
-      { area: "Following Instructions", score: 50, status: "attention" },
-    ],
-    recommendations: [
-      "Arrange diagnostic screening for ADHD and dyslexic traits.",
-      "Integrate interactive reading programs that reward milestone completions.",
-      "Work on vocabulary expansion using flashcards and memory games.",
-    ]
-  }
-];
+
 
 const Results = () => {
   const [assessments, setAssessments] = useState<AssessmentResult[]>([]);
@@ -76,18 +37,14 @@ const Results = () => {
     async function loadData() {
       try {
         const res = await getParentAssessments();
-        if (res.success && res.assessments && res.assessments.length > 0) {
+        if (res.success && res.assessments) {
           setAssessments(res.assessments);
-        } else {
-          // If no database results, use mockAssessments to showcase premium interface
-          setAssessments(mockAssessments);
         }
       } catch (error) {
         console.error("Failed to load assessments:", error);
         toast.error("Database query failed", {
-          description: "Loading offline history instead."
+          description: "Could not load assessments from server."
         });
-        setAssessments(mockAssessments);
       } finally {
         setLoading(false);
       }
@@ -275,7 +232,11 @@ const Results = () => {
       </div>
 
       <div className="space-y-3">
-        {assessments.map((item, i) => {
+        {assessments.length === 0 ? (
+          <div className="card-soft text-center text-muted-foreground py-10">
+            No assessments found. Start an assessment to see your history.
+          </div>
+        ) : assessments.map((item, i) => {
           const dateStr = new Date(item.createdAt).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",

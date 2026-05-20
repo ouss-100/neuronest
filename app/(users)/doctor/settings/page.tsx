@@ -1,20 +1,26 @@
+"use client";
+
 import { motion } from "framer-motion";
 import { Save, User, Bell, Stethoscope, Mail, Phone, MapPin, Award, Clock } from "lucide-react";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
+import { getDoctorProfile, updateDoctorProfile } from "@/server/profileActions";
+import { MOCK_DOCTOR_ID } from "@/lib/constants";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
-const DoctorSettings = () => {
-  const { toast } = useToast();
-
+export default function DoctorSettings() {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState({
-    fullName: "Dr. Ahmed Ali",
-    email: "dr.ahmed@learnbright.com",
-    phone: "+966 50 123 4567",
-    location: "Riyadh, Saudi Arabia",
-    specialization: "Developmental Pediatrics",
-    licenseNumber: "SP-2024-8821",
+    firstname: "",
+    lastname: "",
+    email: "",
+    phone: "",
+    location: "Riyadh, Saudi Arabia", // default/static
+    specialty: "Developmental Pediatrics",
+    identityCard: "",
     yearsOfExperience: "12",
-    bio: "Board-certified developmental pediatrician specializing in early childhood assessments and autism spectrum evaluations. Passionate about early intervention and family-centered care.",
+    bio: "Board-certified developmental pediatrician specializing in early childhood assessments.",
   });
 
   const [notifications, setNotifications] = useState({
@@ -31,6 +37,28 @@ const DoctorSettings = () => {
     maxDailyAppointments: "8",
   });
 
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      const res = await getDoctorProfile(MOCK_DOCTOR_ID);
+      if (res.success && res.doctor) {
+        setProfile({
+          firstname: res.doctor.firstname || "",
+          lastname: res.doctor.lastname || "",
+          email: res.doctor.email || "",
+          phone: res.doctor.phone?.number || "",
+          location: "Riyadh, Saudi Arabia",
+          specialty: res.doctor.specialty || "Developmental Pediatrics",
+          identityCard: res.doctor.identityCard || "",
+          yearsOfExperience: "12",
+          bio: "Board-certified developmental pediatrician specializing in early childhood assessments.",
+        });
+      }
+      setLoading(false);
+    }
+    load();
+  }, []);
+
   const handleProfileChange = (field: string, value: string) => {
     setProfile((prev) => ({ ...prev, [field]: value }));
   };
@@ -39,8 +67,22 @@ const DoctorSettings = () => {
     setNotifications((prev) => ({ ...prev, [field]: !prev[field as keyof typeof prev] }));
   };
 
-  const handleSave = () => {
-    toast({ title: "Settings saved", description: "Your profile and preferences have been updated." });
+  const handleSave = async () => {
+    setSaving(true);
+    const res = await updateDoctorProfile(MOCK_DOCTOR_ID, {
+      firstname: profile.firstname,
+      lastname: profile.lastname,
+      email: profile.email,
+      phone: { countryCode: "+1", number: profile.phone },
+      specialty: profile.specialty,
+      identityCard: profile.identityCard,
+    });
+    setSaving(false);
+    if (res.success) {
+      toast.success("Settings saved", { description: "Your profile and preferences have been updated." });
+    } else {
+      toast.error("Error", { description: "Failed to update profile." });
+    }
   };
 
   const Toggle = ({ checked, onToggle }: { checked: boolean; onToggle: () => void }) => (
@@ -61,8 +103,17 @@ const DoctorSettings = () => {
     { key: "marketingEmails", label: "Marketing & Updates", desc: "Product updates and feature announcements" },
   ];
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <div className="w-8 h-8 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-3xl">
+      <Toaster />
       <div>
         <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">Settings</h1>
         <p className="text-muted-foreground mt-1">Manage your profile, specialization, and preferences</p>
@@ -79,19 +130,23 @@ const DoctorSettings = () => {
 
         <div className="flex items-center gap-4 p-4 rounded-2xl bg-muted/30">
           <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl font-bold font-heading">
-            AA
+            {profile.firstname?.[0]}{profile.lastname?.[0]}
           </div>
           <div>
-            <p className="font-heading font-semibold text-foreground">{profile.fullName}</p>
-            <p className="text-sm text-muted-foreground">{profile.specialization}</p>
+            <p className="font-heading font-semibold text-foreground">Dr. {profile.firstname} {profile.lastname}</p>
+            <p className="text-sm text-muted-foreground">{profile.specialty}</p>
             <button className="text-xs text-primary font-medium mt-1 hover:underline">Change Photo</button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-muted-foreground" /> Full Name</label>
-            <input className="input-soft" value={profile.fullName} onChange={(e) => handleProfileChange("fullName", e.target.value)} />
+            <label className="text-sm font-medium text-foreground flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-muted-foreground" /> First Name</label>
+            <input className="input-soft" value={profile.firstname} onChange={(e) => handleProfileChange("firstname", e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-muted-foreground" /> Last Name</label>
+            <input className="input-soft" value={profile.lastname} onChange={(e) => handleProfileChange("lastname", e.target.value)} />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-muted-foreground" /> Email</label>
@@ -125,18 +180,19 @@ const DoctorSettings = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Specialization</label>
-            <select className="input-soft" value={profile.specialization} onChange={(e) => handleProfileChange("specialization", e.target.value)}>
+            <select className="input-soft" value={profile.specialty} onChange={(e) => handleProfileChange("specialty", e.target.value)}>
+              <option>Neurologist</option>
+              <option>Speech Therapist</option>
+              <option>Child Psychologist</option>
+              <option>Pediatric Neurologist</option>
               <option>Developmental Pediatrics</option>
-              <option>Child Psychology</option>
-              <option>Pediatric Neurology</option>
-              <option>Speech-Language Pathology</option>
               <option>Occupational Therapy</option>
               <option>Behavioral Therapy</option>
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground flex items-center gap-1.5"><Award className="w-3.5 h-3.5 text-muted-foreground" /> License Number</label>
-            <input className="input-soft" value={profile.licenseNumber} onChange={(e) => handleProfileChange("licenseNumber", e.target.value)} />
+            <label className="text-sm font-medium text-foreground flex items-center gap-1.5"><Award className="w-3.5 h-3.5 text-muted-foreground" /> License / Identity Card</label>
+            <input className="input-soft" value={profile.identityCard} onChange={(e) => handleProfileChange("identityCard", e.target.value)} />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Years of Experience</label>
@@ -196,12 +252,11 @@ const DoctorSettings = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
         onClick={handleSave}
+        disabled={saving}
         className="btn-accent flex items-center gap-2"
       >
-        <Save className="w-4 h-4" /> Save Changes
+        <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save Changes"}
       </motion.button>
     </div>
   );
-};
-
-export default DoctorSettings;
+}
