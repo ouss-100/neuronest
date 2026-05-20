@@ -6,46 +6,11 @@ import SearchBar from "@/components/SearchBar";
 import DoctorCard from "@/components/DoctorCard";
 import DoctorProfile from "@/components/DoctorProfile";
 import DoctorMap from "@/components/DoctorMap";
-
- interface Doctor {
-  id: number;
-  name: string;
-  specialty: string;
-  rating: number;
-  reviews: number;
-  latitude: number;
-  longitude: number;
-  avatar: string;
-}
-
-// Dummy doctors around Paris area
- const doctors: Doctor[] = [
-  { id: 1, name: "Dr. Sophie Martin", specialty: "Neurologist", rating: 4.9, reviews: 127, latitude: 48.8566, longitude: 2.3522, avatar: "SM" },
-  { id: 2, name: "Dr. Pierre Dubois", specialty: "Speech Therapist", rating: 4.8, reviews: 93, latitude: 48.8606, longitude: 2.3376, avatar: "PD" },
-  { id: 3, name: "Dr. Marie Laurent", specialty: "Child Psychologist", rating: 4.7, reviews: 156, latitude: 48.8530, longitude: 2.3499, avatar: "ML" },
-  { id: 4, name: "Dr. Jean Moreau", specialty: "Pediatric Neurologist", rating: 4.9, reviews: 201, latitude: 48.8648, longitude: 2.3490, avatar: "JM" },
-  { id: 5, name: "Dr. Claire Bernard", specialty: "Neurologist", rating: 4.6, reviews: 78, latitude: 48.8510, longitude: 2.3600, avatar: "CB" },
-  { id: 6, name: "Dr. Luc Petit", specialty: "Speech Therapist", rating: 4.8, reviews: 112, latitude: 48.8700, longitude: 2.3320, avatar: "LP" },
-  { id: 7, name: "Dr. Anne Richard", specialty: "Child Psychologist", rating: 4.5, reviews: 64, latitude: 48.8450, longitude: 2.3450, avatar: "AR" },
-  { id: 8, name: "Dr. Thomas Robert", specialty: "Pediatric Neurologist", rating: 4.7, reviews: 89, latitude: 48.8590, longitude: 2.3700, avatar: "TR" },
-  { id: 9, name: "Dr. Isabelle Durand", specialty: "Neurologist", rating: 4.4, reviews: 52, latitude: 48.8680, longitude: 2.3580, avatar: "ID" },
-  { id: 10, name: "Dr. François Garcia", specialty: "Speech Therapist", rating: 4.9, reviews: 145, latitude: 48.8480, longitude: 2.3300, avatar: "FG" },
-  { id: 11, name: "Dr. Nathalie Simon", specialty: "Child Psychologist", rating: 4.6, reviews: 98, latitude: 48.8720, longitude: 2.3450, avatar: "NS" },
-  { id: 12, name: "Dr. Michel Lefèvre", specialty: "Pediatric Neurologist", rating: 4.8, reviews: 176, latitude: 48.8550, longitude: 2.3250, avatar: "ML2" },
-];
-
- function getDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
+import { doctors, getDistance } from "@/data/doctors";
+import type { Doctor } from "@/data/doctors";
 
 export default function Index() {
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(
-    null,
-  );
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [search, setSearch] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [flyTo, setFlyTo] = useState<[number, number] | null>(null);
@@ -53,17 +18,14 @@ export default function Index() {
   useEffect(() => {
     navigator.geolocation?.getCurrentPosition(
       (pos) => setUserLocation([pos.coords.latitude, pos.coords.longitude]),
-      () => setUserLocation([48.8566, 2.3522]),
+      () => setUserLocation([48.8566, 2.3522])
     );
   }, []);
 
   const doctorsWithDistance = useMemo(() => {
     const loc = userLocation || [48.8566, 2.3522];
     return doctors
-      .map((d) => ({
-        ...d,
-        distance: getDistance(loc[0], loc[1], d.latitude, d.longitude),
-      }))
+      .map((d) => ({ ...d, distance: getDistance(loc[0], loc[1], d.latitude, d.longitude) }))
       .sort((a, b) => b.rating - a.rating || a.distance - b.distance);
   }, [userLocation]);
 
@@ -71,9 +33,7 @@ export default function Index() {
     if (!search) return doctorsWithDistance;
     const q = search.toLowerCase();
     return doctorsWithDistance.filter(
-      (d) =>
-        d.name.toLowerCase().includes(q) ||
-        d.specialty.toLowerCase().includes(q),
+      (d) => d.name.toLowerCase().includes(q) || d.specialty.toLowerCase().includes(q)
     );
   }, [search, doctorsWithDistance]);
 
@@ -95,19 +55,11 @@ export default function Index() {
         <div className="p-4 pb-3 border-b border-border/30">
           <div className="flex items-center gap-2.5 mb-3">
             <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center">
-              <Heart
-                className="h-5 w-5 text-primary"
-                fill="currentColor"
-                opacity={0.7}
-              />
+              <Heart className="h-5 w-5 text-primary" fill="currentColor" opacity={0.7} />
             </div>
             <div>
-              <h1 className="font-bold text-foreground text-lg leading-tight">
-                NeuroFind
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                Find the right specialist for your child ✨
-              </p>
+              <h1 className="font-bold text-foreground text-lg leading-tight">NeuroFind</h1>
+              <p className="text-xs text-muted-foreground">Find the right specialist for your child ✨</p>
             </div>
           </div>
           <SearchBar value={search} onChange={setSearch} />
