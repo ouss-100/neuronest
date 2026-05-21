@@ -9,23 +9,7 @@ import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { analyzeAssessment, saveAssessmentResult } from "@/server/assessmentActions";
 
-const mockResult = {
-  score: 82,
-  analysis: [
-    { area: "Reading Comprehension", score: 72, status: "attention" },
-    { area: "Letter Recognition", score: 85, status: "good" },
-    { area: "Attention Span", score: 65, status: "attention" },
-    { area: "Number Skills", score: 90, status: "good" },
-    { area: "Writing Skills", score: 78, status: "good" },
-    { area: "Following Instructions", score: 60, status: "attention" },
-  ],
-  recommendations: [
-    "Consider a professional evaluation for reading and attention patterns.",
-    "Practice multi-step instructions with visual aids at home.",
-    "Reading aloud for 15 minutes daily can strengthen comprehension.",
-    "Consult with your child's teacher about classroom accommodations.",
-  ]
-};
+
 
 const Assessment = () => {
   const [current, setCurrent] = useState(-1);
@@ -89,19 +73,12 @@ const Assessment = () => {
           toast.error("AI analysis failed", {
             description: res.message || "Failed to parse screening results.",
           });
-          await saveAssessmentResult(mockResult, { age: Number(childAge) || 7, gender: childGender || "Other" });
-          setResultData(mockResult);
-          setCompleted(true); // Fallback to mock
         }
       } catch (error) {
         console.error("AI analysis error:", error);
         toast.error("Screening analysis error", {
           description: "An unexpected error occurred during AI analysis.",
         });
-        await saveAssessmentResult(mockResult, { age: Number(childAge) || 7, gender: childGender || "Other" });
-        setResultData(mockResult);
-        setCompleted(true); // Fallback to mock
-      } finally {
         setLoading(false);
       }
     }
@@ -134,11 +111,10 @@ const Assessment = () => {
     );
   }
 
-  if (completed) {
-    const resultsObj = resultData || mockResult;
-    const score = resultsObj.score;
-    const analysis = resultsObj.analysis;
-    const recommendations = resultsObj.recommendations;
+  if (completed && resultData) {
+    const score = resultData.score;
+    const analysis = resultData.analysis;
+    const recommendations = resultData.recommendations;
 
     return (
       <div className="space-y-6">

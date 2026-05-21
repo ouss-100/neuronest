@@ -57,38 +57,30 @@ export const getAssessmentsByChild = async (childId: string) => {
 };
 
 export async function askDeepSeek(prompt: string, maxTokens = 1000) {
-  const HF_TOKEN = process.env.HF_TOKEN;
-
-  if (!HF_TOKEN) {
-    throw new Error("HF_TOKEN is missing in environment variables");
-  }
-
-  const response = await fetch(
-    "https://api-inference.huggingface.co/models/deepseek-ai/DeepSeek-R1",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${HF_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        inputs: prompt,
-        parameters: {
-          max_new_tokens: maxTokens,
-          temperature: 0.7,
+  const response = await fetch("https://text.pollinations.ai/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      messages: [
+        { 
+          role: "system", 
+          content: "You are a developmental screening assistant. Only respond with valid JSON matching the requested structure." 
         },
-      }),
-    }
-  );
+        { role: "user", content: prompt }
+      ],
+      jsonMode: true,
+      seed: Math.floor(Math.random() * 1000000),
+    }),
+  });
 
-  const data = await response.json();
-
-  // HF sometimes returns array or object depending on model
-  if (Array.isArray(data)) {
-    return data[0]?.generated_text ?? "No response";
+  if (!response.ok) {
+    throw new Error(`AI API failed with status ${response.status}`);
   }
 
-  return data.generated_text ?? data;
+  const text = await response.text();
+  return text;
 }
 
 export async function analyzeAssessment(qaPairs: { question: string; answer: string }[]) {
