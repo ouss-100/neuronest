@@ -10,6 +10,7 @@ export interface IChild extends Document {
   parentId: mongoose.Types.ObjectId;
 
   age: number;
+  gender: string;
 
   symptoms: ISymptom[];
 
@@ -34,6 +35,7 @@ const ChildSchema = new Schema<IChild>(
       index: true,
     },
     age: { type: Number, required: true, min: 0 },
+    gender: { type: String, enum: ["Male", "Female", "Other"], required: true, default: "Other" },
     symptoms: [SymptomSchema],
   },
   { timestamps: true }

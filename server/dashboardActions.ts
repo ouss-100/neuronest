@@ -49,6 +49,8 @@ export const getParentDashboardStats = async (parentId: string) => {
         latestScore,
         children: JSON.parse(JSON.stringify(children)),
         notifications: dynamicNotifications,
+        assessments: JSON.parse(JSON.stringify(assessments.slice(0, 5))),
+        appointments: JSON.parse(JSON.stringify(appointments.slice(0, 3))),
       }
     };
   } catch (error: any) {

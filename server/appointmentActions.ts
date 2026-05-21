@@ -29,8 +29,16 @@ export const bookAppointment = async (data: {
     if (!actualChildId) {
       // Find the first child of the parent
       const { Child } = await import("@/models/Child");
-      const child = await Child.findOne({ parentId: data.parentId });
-      if (!child) return { success: false, message: "No child found for this parent" };
+      let child = await Child.findOne({ parentId: data.parentId });
+      if (!child) {
+        // Automatically create a default child if the parent has none
+        child = await Child.create({
+          parentId: data.parentId,
+          age: 7,
+          gender: "Other",
+          symptoms: [],
+        });
+      }
       actualChildId = child._id.toString();
     }
 

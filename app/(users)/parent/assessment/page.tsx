@@ -7,7 +7,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, TrendingUp, AlertCircle, Brain, St
 import { questions } from "@/assets/assets";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
-import { analyzeAssessment, saveAssessmentResult } from "@/server/aiAction";
+import { analyzeAssessment, saveAssessmentResult } from "@/server/assessmentActions";
 
 const mockResult = {
   score: 82,
@@ -28,7 +28,9 @@ const mockResult = {
 };
 
 const Assessment = () => {
-  const [current, setCurrent] = useState(0);
+  const [current, setCurrent] = useState(-1);
+  const [childAge, setChildAge] = useState<number | "">("");
+  const [childGender, setChildGender] = useState<string>("");
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [completed, setCompleted] = useState(false);
   const [resultData, setResultData] = useState<{
@@ -57,11 +59,12 @@ const Assessment = () => {
     "Generating custom guidelines and recommendations...",
   ];
 
-  const question = questions[current];
+  const question = current === -1 ? null : questions[current];
   const progress =
-    ((current + (answers[question?.id] ? 1 : 0)) / questions.length) * 100;
+    current === -1 ? 0 : ((current + (answers[question?.id || ""] ? 1 : 0)) / questions.length) * 100;
 
   const handleAnswer = (option: string) => {
+    if (!question) return;
     setAnswers({ ...answers, [question.id]: option });
   };
 
@@ -79,14 +82,14 @@ const Assessment = () => {
         const res = await analyzeAssessment(qaPairs);
         if (res.success && res.result) {
           localStorage.setItem("neuronest_assessment_results", JSON.stringify(res.result));
-          await saveAssessmentResult(res.result);
+          await saveAssessmentResult(res.result, { age: Number(childAge) || 7, gender: childGender || "Other" });
           setResultData(res.result);
           setCompleted(true);
         } else {
           toast.error("AI analysis failed", {
             description: res.message || "Failed to parse screening results.",
           });
-          await saveAssessmentResult(mockResult);
+          await saveAssessmentResult(mockResult, { age: Number(childAge) || 7, gender: childGender || "Other" });
           setResultData(mockResult);
           setCompleted(true); // Fallback to mock
         }
@@ -95,7 +98,7 @@ const Assessment = () => {
         toast.error("Screening analysis error", {
           description: "An unexpected error occurred during AI analysis.",
         });
-        await saveAssessmentResult(mockResult);
+        await saveAssessmentResult(mockResult, { age: Number(childAge) || 7, gender: childGender || "Other" });
         setResultData(mockResult);
         setCompleted(true); // Fallback to mock
       } finally {
@@ -151,7 +154,7 @@ const Assessment = () => {
           </div>
           <div className="flex gap-2 flex-wrap sm:flex-nowrap">
             <Link
-              href="/parent/doctors"
+              href="/parent/find-doctor"
               className="btn-accent !px-4 !py-2.5 text-sm flex items-center gap-1.5"
             >
               <Stethoscope className="w-4 h-4" />
@@ -288,7 +291,7 @@ const Assessment = () => {
             </p>
           </div>
           <Link
-            href="/parent/doctors"
+            href="/parent/find-doctor"
             className="btn-accent !px-5 !py-2.5 text-sm flex items-center gap-1.5 shrink-0"
           >
             <Stethoscope className="w-4 h-4" /> Find Specialists Nearby
@@ -311,7 +314,7 @@ const Assessment = () => {
       <motion.div layout className="card-soft !rounded-[40px] !p-8 lg:!p-10">
         <div className="flex justify-between items-center mb-8">
           <span className="text-sm font-bold text-primary uppercase tracking-widest font-heading">
-            Question {current + 1} of {questions.length}
+            {current === -1 ? "Initial Setup" : `Question ${current + 1} of ${questions.length}`}
           </span>
           <div className="w-32">
             <div className="progress-track">
@@ -324,63 +327,121 @@ const Assessment = () => {
         </div>
 
         <AnimatePresence mode="wait">
-          <motion.div
-            key={question.id}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-          >
-            <h2 className="text-xl lg:text-2xl font-heading font-bold text-foreground mb-8">
-              {question.text}
-            </h2>
-            <div className="grid gap-3">
-              {question.options.map((option) => (
-                <button
-                  key={option}
-                  onClick={() => handleAnswer(option)}
-                  className={`w-full p-5 text-left rounded-2xl border-2 transition-all duration-300 flex justify-between items-center group ${answers[question.id] === option
+          {current === -1 ? (
+            <motion.div
+              key="initial-step"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <h2 className="text-xl lg:text-2xl font-heading font-bold text-foreground mb-4">
+                Child Information
+              </h2>
+              <p className="text-muted-foreground mb-8 text-sm">
+                Before we begin the assessment, please provide a few details about your child to help personalize the screening.
+              </p>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">Age (in years)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="18"
+                    value={childAge}
+                    onChange={(e) => setChildAge(e.target.value === "" ? "" : Number(e.target.value))}
+                    className="w-full px-4 py-3 rounded-xl border border-input bg-background/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    placeholder="e.g. 7"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">Gender</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {["Male", "Female"].map((g) => (
+                      <button
+                        key={g}
+                        onClick={() => setChildGender(g)}
+                        className={`py-3 rounded-xl border-2 transition-all text-sm font-medium ${childGender === g
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border/50 text-muted-foreground hover:border-primary/30"
+                          }`}
+                      >
+                        {g}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ) : question && (
+            <motion.div
+              key={question.id}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <h2 className="text-xl lg:text-2xl font-heading font-bold text-foreground mb-8">
+                {question.text}
+              </h2>
+              <div className="grid gap-3">
+                {question.options.map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => handleAnswer(option)}
+                    className={`w-full p-5 text-left rounded-2xl border-2 transition-all duration-300 flex justify-between items-center group ${answers[question.id] === option
                       ? "border-primary bg-primary/5"
                       : "border-border/50 hover:border-primary/30 hover:bg-primary/5"
-                    }`}
-                  style={{
-                    transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                  }}
-                >
-                  <span className="font-semibold text-foreground">
-                    {option}
-                  </span>
-                  <div
-                    className={`w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center ${answers[question.id] === option
+                      }`}
+                    style={{
+                      transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                    }}
+                  >
+                    <span className="font-semibold text-foreground">
+                      {option}
+                    </span>
+                    <div
+                      className={`w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center ${answers[question.id] === option
                         ? "border-primary bg-primary"
                         : "border-muted-foreground/30"
-                      }`}
-                  >
-                    {answers[question.id] === option && (
-                      <div className="w-2.5 h-2.5 rounded-full bg-primary-foreground" />
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </motion.div>
+                        }`}
+                    >
+                      {answers[question.id] === option && (
+                        <div className="w-2.5 h-2.5 rounded-full bg-primary-foreground" />
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
 
         <div className="flex justify-between mt-8">
           <button
-            onClick={() => setCurrent(Math.max(0, current - 1))}
-            disabled={current === 0}
+            onClick={() => setCurrent(Math.max(-1, current - 1))}
+            disabled={current === -1}
             className="btn-outline-primary !px-5 !py-2.5 text-sm disabled:opacity-30"
           >
             Previous
           </button>
-          <button
-            onClick={handleNext}
-            disabled={!answers[question.id]}
-            className="btn-accent !px-5 !py-2.5 text-sm disabled:opacity-30 flex items-center gap-2"
-          >
-            {current === questions.length - 1 ? "See Results" : "Next"}{" "}
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          {current === -1 ? (
+            <button
+              onClick={() => setCurrent(0)}
+              disabled={childAge === "" || !childGender}
+              className="btn-accent !px-5 !py-2.5 text-sm disabled:opacity-30 flex items-center gap-2"
+            >
+              Start Assessment <ArrowRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              onClick={handleNext}
+              disabled={!question || !answers[question.id]}
+              className="btn-accent !px-5 !py-2.5 text-sm disabled:opacity-30 flex items-center gap-2"
+            >
+              {current === questions.length - 1 ? "See Results" : "Next"}{" "}
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </motion.div>
     </div>

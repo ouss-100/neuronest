@@ -8,18 +8,22 @@ import { getRapportsByChild } from "@/server/rapportActions";
 import { getChildrenByParent } from "@/server/childActions";
 import { format } from "date-fns";
 import { useSession } from "next-auth/react";
+import { MOCK_PARENT_ID } from "@/lib/constants";
 
 export default function ParentRecommendations() {
   const [rapports, setRapports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
+    if (status === "loading") return;
+
     async function load() {
-      if (!session?.user?.id) return;
+      const parentId = session?.user?.id || MOCK_PARENT_ID;
+      if (!parentId) return;
       setLoading(true);
       // Get all children for this parent, then fetch rapports for each
-      const childrenRes = await getChildrenByParent(session.user.id);
+      const childrenRes = await getChildrenByParent(parentId);
       if (childrenRes.success && childrenRes.children.length > 0) {
         // Fetch rapports for all children
         const allRapports: any[] = [];
@@ -40,10 +44,8 @@ export default function ParentRecommendations() {
       setLoading(false);
     }
     
-    if (session?.user?.id) {
-      load();
-    }
-  }, [session?.user?.id]);
+    load();
+  }, [session?.user?.id, status]);
 
   return (
     <div className="space-y-6">

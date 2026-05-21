@@ -114,7 +114,6 @@ export default function DashboardClient({
   const navConfig = {
     parent: [
       { label: "Dashboard", icon: LayoutDashboard, to: "/parent" },
-      { label: "Children", icon: Baby, to: "/parent/child-profile" },
       { label: "Assessment", icon: ClipboardList, to: "/parent/assessment" },
       { label: "Results", icon: BarChart3, to: "/parent/results" },
       { label: "Find a Doctor", icon: Stethoscope, to: "/parent/find-doctor" },
@@ -158,8 +157,8 @@ export default function DashboardClient({
               key={item.to}
               href={item.to}
               className={`flex items-center gap-3 px-3 py-2 rounded-xl ${isActive(item.to)
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-muted"
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted"
                 }`}
             >
               <item.icon className="w-5 h-5" />

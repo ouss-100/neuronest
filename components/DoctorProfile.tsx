@@ -3,6 +3,8 @@ import { Star, MapPin, X, Calendar, Navigation, ShieldCheck } from "lucide-react
 import { useSession } from "next-auth/react";
 import type { Doctor } from "@/types/doctor";
 import { bookAppointment } from "@/server/appointmentActions";
+import { toast } from "sonner";
+import { MOCK_PARENT_ID } from "@/lib/constants";
 
 interface DoctorProfileProps {
   doctor: Doctor;
@@ -31,13 +33,15 @@ export default function DoctorProfile({ doctor, distance, onClose }: DoctorProfi
     setIsSubmitting(true);
     const res = await bookAppointment({
       doctorId: (doctor as any)._id || (doctor as any).id || "temp-doctor-id",
-      parentId: session?.user?.id || "",
+      parentId: session?.user?.id || MOCK_PARENT_ID,
       childId: undefined, // Let the backend default to the parent's child
       appointmentDate: new Date(bookingDate),
       reason: bookingReason || "Consultation",
     });
     if (res.success) {
       setBookingSuccess(true);
+    } else {
+      toast.error(res.message || "Failed to book appointment");
     }
     setIsSubmitting(false);
   };

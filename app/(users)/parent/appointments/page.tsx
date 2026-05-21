@@ -14,8 +14,9 @@ import {
   Stethoscope,
 } from "lucide-react";
 import { getAppointmentsByParent } from "@/server/appointmentActions";
-import { MOCK_PARENT_ID } from "@/lib/constants";
+import { useSession } from "next-auth/react";
 import { format } from "date-fns";
+import { MOCK_PARENT_ID } from "@/lib/constants";
 
 const statusConfig: Record<
   string,
@@ -47,18 +48,23 @@ export default function ParentAppointments() {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const { data: session, status } = useSession();
 
   useEffect(() => {
+    if (status === "loading") return;
+
     async function load() {
+      const parentId = session?.user?.id || MOCK_PARENT_ID;
+      if (!parentId) return;
       setLoading(true);
-      const res = await getAppointmentsByParent(MOCK_PARENT_ID);
+      const res = await getAppointmentsByParent(parentId);
       if (res.success && res.appointments) {
         setAppointments(res.appointments);
       }
       setLoading(false);
     }
     load();
-  }, []);
+  }, [session?.user?.id, status]);
 
   const filtered =
     filter === "all"

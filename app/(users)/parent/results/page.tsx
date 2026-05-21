@@ -14,7 +14,7 @@ import {
   ChevronRight,
   Calendar,
 } from "lucide-react";
-import { getParentAssessments } from "@/server/aiAction";
+import { getParentAssessments } from "@/server/assessmentActions";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 

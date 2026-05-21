@@ -36,6 +36,7 @@ export const createRapport = async (data: {
       childId: new mongoose.Types.ObjectId(childId),
       ...rest,
       nextVisitDate: nextVisitDate ? new Date(nextVisitDate) : undefined,
+      isDraft: false, // Finalized reports are immediately visible to parents
     });
 
     return { 
@@ -133,7 +134,7 @@ export const getRapportsByChild = async (childId: string) => {
     const rapports = await Rapport.find({ childId, isDraft: { $ne: true } })
       .populate("doctorId", "firstname lastname specialty")
       .sort({ createdAt: -1 });
-      
+      console.log("rapports parent part",rapports);
     return { success: true, rapports: JSON.parse(JSON.stringify(rapports)) };
   } catch (error) {
     console.error("Error fetching rapports:", error);
