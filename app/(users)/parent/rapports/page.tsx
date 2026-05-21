@@ -6,18 +6,20 @@ import Link from "next/link";
 import { ArrowLeft, Stethoscope, Calendar, FileText, FlaskConical } from "lucide-react";
 import { getRapportsByChild } from "@/server/rapportActions";
 import { getChildrenByParent } from "@/server/childActions";
-import { MOCK_PARENT_ID } from "@/lib/constants";
 import { format } from "date-fns";
+import { useSession } from "next-auth/react";
 
 export default function ParentRecommendations() {
   const [rapports, setRapports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
 
   useEffect(() => {
     async function load() {
+      if (!session?.user?.id) return;
       setLoading(true);
       // Get all children for this parent, then fetch rapports for each
-      const childrenRes = await getChildrenByParent(MOCK_PARENT_ID);
+      const childrenRes = await getChildrenByParent(session.user.id);
       if (childrenRes.success && childrenRes.children.length > 0) {
         // Fetch rapports for all children
         const allRapports: any[] = [];
@@ -37,8 +39,11 @@ export default function ParentRecommendations() {
       }
       setLoading(false);
     }
-    load();
-  }, []);
+    
+    if (session?.user?.id) {
+      load();
+    }
+  }, [session?.user?.id]);
 
   return (
     <div className="space-y-6">
@@ -77,13 +82,13 @@ export default function ParentRecommendations() {
       ) : (
         <div className="space-y-4">
           {rapports.map((rapport, i) => (
-            <motion.div
-              key={rapport._id || i}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="card-soft"
-            >
+            <Link href={`/parent/rapports/${rapport._id}`} key={rapport._id || i} className="block">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="card-soft-hover"
+              >
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                   <Stethoscope className="w-6 h-6" />
@@ -142,7 +147,8 @@ export default function ParentRecommendations() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+              </motion.div>
+            </Link>
           ))}
         </div>
       )}

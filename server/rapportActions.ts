@@ -158,3 +158,44 @@ export const getRapportsByDoctor = async (doctorId: string) => {
     return { success: false, message: "Failed to fetch rapports", rapports: [] };
   }
 };
+
+/* =======================
+   GET RAPPORT BY ID
+======================= */
+export const getRapportById = async (rapportId: string) => {
+  try {
+    await connectDB();
+    
+    // Fetch rapport with child, parent, and doctor info
+    const rapport = await Rapport.findById(rapportId)
+      .populate({
+        path: "childId",
+        select: "age symptoms parentId",
+        populate: {
+          path: "parentId",
+          select: "firstname lastname email phone",
+        }
+      })
+      .populate("doctorId", "firstname lastname specialty")
+      .lean();
+
+    if (!rapport) {
+      return { success: false, message: "Report not found" };
+    }
+
+    // Fetch the latest assessment for this child
+    const { Assessment } = await import("@/models/Assessment");
+    const latestAssessment = await Assessment.findOne({ childId: (rapport.childId as any)._id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return { 
+      success: true, 
+      rapport: JSON.parse(JSON.stringify(rapport)),
+      assessment: latestAssessment ? JSON.parse(JSON.stringify(latestAssessment)) : null
+    };
+  } catch (error) {
+    console.error("Error fetching rapport details:", error);
+    return { success: false, message: "Failed to fetch report details", rapport: null, assessment: null };
+  }
+};
