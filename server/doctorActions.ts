@@ -3,9 +3,6 @@
 import connectDB from "@/lib/mongodb";
 import { Doctor } from "@/models/Doctor";
 
-/* =======================
-   GET ALL ACTIVE DOCTORS
-======================= */
 export const getActiveDoctors = async () => {
   try {
     await connectDB();
@@ -20,9 +17,6 @@ export const getActiveDoctors = async () => {
   }
 };
 
-/* =======================
-   SEARCH DOCTORS BY SPECIALTY
-======================= */
 export const searchDoctorsBySpecialty = async (specialty: string) => {
   try {
     await connectDB();

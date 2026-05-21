@@ -6,12 +6,7 @@ import mongoose from "mongoose";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { Child } from "@/models/Child";
-import { MOCK_PARENT_ID } from "@/lib/constants";
-import { ensureMockUsers } from "@/lib/mockSession";
 
-/* =======================
-   CREATE ASSESSMENT
-======================= */
 export const createAssessment = async (data: {
   childId: string;
   symptomsSnapshot: string[];
@@ -41,9 +36,7 @@ export const createAssessment = async (data: {
   }
 };
 
-/* =======================
-   GET ASSESSMENTS BY CHILD
-======================= */
+
 export const getAssessmentsByChild = async (childId: string) => {
   try {
     await connectDB();
@@ -144,11 +137,9 @@ You must respond ONLY with a valid JSON object. Do not include any explanations,
 export async function saveAssessmentResult(result: { score: number; analysis: any[]; recommendations: string[] }, childInfo?: { age: number, gender: string }) {
   try {
     await connectDB();
-    await ensureMockUsers();
     const session = await getServerSession(authOptions);
-    const parentId = session?.user?.id || MOCK_PARENT_ID;
-
-    // Find or create child
+    const parentId = session?.user?.id;
+    if (!parentId) return { success: false, message: "Unauthorized" };
     let child = await Child.findOne({ parentId });
     if (!child) {
       child = await Child.create({
@@ -183,23 +174,12 @@ export async function saveAssessmentResult(result: { score: number; analysis: an
 export async function getParentAssessments() {
   try {
     await connectDB();
-    await ensureMockUsers();
     const session = await getServerSession(authOptions);
-    const parentId = session?.user?.id || MOCK_PARENT_ID;
+    const parentId = session?.user?.id;
+    if (!parentId) return { success: false, message: "Unauthorized", assessments: [] };
 
     // Find children for this parent
-    let children = await Child.find({ parentId });
-
-    // If no children exist, create a default one
-    if (children.length === 0) {
-      const defaultChild = await Child.create({
-        parentId,
-        age: 7,
-        gender: "Other",
-        symptoms: [],
-      });
-      children = [defaultChild];
-    }
+    const children = await Child.find({ parentId });
 
     const childIds = children.map(c => c._id);
 

@@ -4,11 +4,9 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft, Stethoscope, Calendar, FileText, FlaskConical } from "lucide-react";
-import { getRapportsByChild } from "@/server/rapportActions";
-import { getChildrenByParent } from "@/server/childActions";
+import { getRapportsByParent } from "@/server/rapportActions";
 import { format } from "date-fns";
 import { useSession } from "next-auth/react";
-import { MOCK_PARENT_ID } from "@/lib/constants";
 
 export default function ParentRecommendations() {
   const [rapports, setRapports] = useState<any[]>([]);
@@ -19,31 +17,16 @@ export default function ParentRecommendations() {
     if (status === "loading") return;
 
     async function load() {
-      const parentId = session?.user?.id || MOCK_PARENT_ID;
-      if (!parentId) return;
+      const parentId = session?.user?.id;
+      if (!parentId) { setLoading(false); return; }
       setLoading(true);
-      // Get all children for this parent, then fetch rapports for each
-      const childrenRes = await getChildrenByParent(parentId);
-      if (childrenRes.success && childrenRes.children.length > 0) {
-        // Fetch rapports for all children
-        const allRapports: any[] = [];
-        for (const child of childrenRes.children) {
-          const res = await getRapportsByChild(child._id);
-          if (res.success && res.rapports) {
-            allRapports.push(
-              ...res.rapports.map((r: any) => ({ ...r, childAge: child.age }))
-            );
-          }
-        }
-        // Sort by date, newest first
-        allRapports.sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        setRapports(allRapports);
+      const res = await getRapportsByParent(parentId);
+      if (res.success && res.rapports) {
+        setRapports(res.rapports);
       }
       setLoading(false);
     }
-    
+
     load();
   }, [session?.user?.id, status]);
 

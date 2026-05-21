@@ -23,6 +23,8 @@ export default function DoctorReports() {
     const rapportsRes = await getRapportsByDoctor(session.user.id);
     if (rapportsRes.success) {
       // Sort: Drafts first, then newest first
+      console.log("rapportsRes", rapportsRes);  
+      console.log("rapportsRes.rapports");  
       const sorted = (rapportsRes.rapports || []).sort((a: any, b: any) => {
         if (a.isDraft === b.isDraft) {
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -55,7 +57,7 @@ export default function DoctorReports() {
   const draftsCount = rapports.filter(r => r.isDraft).length;
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">Reports</h1>
           <p className="text-muted-foreground mt-1">View and complete detailed patient reports</p>

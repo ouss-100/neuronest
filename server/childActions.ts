@@ -4,9 +4,7 @@ import connectDB from "@/lib/mongodb";
 import { Child, ISymptom } from "@/models/Child";
 import mongoose from "mongoose";
 
-/* =======================
-   GET CHILDREN BY PARENT
-======================= */
+
 export const getChildrenByParent = async (parentId: string) => {
   try {
     await connectDB();
@@ -18,9 +16,6 @@ export const getChildrenByParent = async (parentId: string) => {
   }
 };
 
-/* =======================
-   GET CHILD BY ID
-======================= */
 export const getChildById = async (childId: string) => {
   try {
     await connectDB();
@@ -35,9 +30,6 @@ export const getChildById = async (childId: string) => {
   }
 };
 
-/* =======================
-   ADD CHILD
-======================= */
 export const addChild = async (data: { parentId: string; age: number; symptoms?: Omit<ISymptom, "createdAt">[] }) => {
   try {
     await connectDB();
@@ -64,9 +56,6 @@ export const addChild = async (data: { parentId: string; age: number; symptoms?:
   }
 };
 
-/* =======================
-   ADD SYMPTOMS TO CHILD
-======================= */
 export const addChildSymptoms = async (childId: string, newSymptoms: Omit<ISymptom, "createdAt">[]) => {
   try {
     await connectDB();

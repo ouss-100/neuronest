@@ -4,11 +4,7 @@ import connectDB from "@/lib/mongodb";
 import { Child } from "@/models/Child";
 import { Assessment } from "@/models/Assessment";
 import { Appointment } from "@/models/Appointment";
-import Notification from "@/models/Notification";
 
-/* =======================
-   PARENT DASHBOARD
-======================= */
 export const getParentDashboardStats = async (parentId: string) => {
   try {
     await connectDB();
@@ -59,9 +55,6 @@ export const getParentDashboardStats = async (parentId: string) => {
   }
 };
 
-/* =======================
-   DOCTOR DASHBOARD
-======================= */
 export const getDoctorDashboardStats = async (doctorId: string) => {
   try {
     await connectDB();

@@ -3,14 +3,11 @@
 import connectDB from "@/lib/mongodb";
 import { Rapport } from "@/models/Rapport";
 import mongoose from "mongoose";
-import "@/models/Child"; // Ensure Child schema is registered for populate
-import "@/models/Doctor"; // Ensure Doctor schema is registered
-import "@/models/User"; // Ensure User schema is registered
-import "@/models/Appointment"; // Ensure Appointment schema is registered
+import "@/models/Child";
+import "@/models/Doctor";
+import "@/models/User"; 
+import "@/models/Appointment"; 
 
-/* =======================
-   CREATE RAPPORT
-======================= */
 export const createRapport = async (data: {
   doctorId: string;
   childId: string;
@@ -50,9 +47,6 @@ export const createRapport = async (data: {
   }
 };
 
-/* =======================
-   CREATE DRAFT RAPPORT
-======================= */
 export const createDraftRapport = async (data: {
   doctorId: string;
   childId: string;
@@ -86,9 +80,6 @@ export const createDraftRapport = async (data: {
   }
 };
 
-/* =======================
-   UPDATE RAPPORT
-======================= */
 export const updateRapport = async (
   rapportId: string,
   data: Partial<typeof Rapport.prototype>
@@ -124,17 +115,12 @@ export const updateRapport = async (
   }
 };
 
-
-/* =======================
-   GET RAPPORTS BY CHILD
-======================= */
 export const getRapportsByChild = async (childId: string) => {
   try {
     await connectDB();
     const rapports = await Rapport.find({ childId, isDraft: { $ne: true } })
       .populate("doctorId", "firstname lastname specialty")
       .sort({ createdAt: -1 });
-      console.log("rapports parent part",rapports);
     return { success: true, rapports: JSON.parse(JSON.stringify(rapports)) };
   } catch (error) {
     console.error("Error fetching rapports:", error);
@@ -142,9 +128,32 @@ export const getRapportsByChild = async (childId: string) => {
   }
 };
 
-/* =======================
-   GET RAPPORTS BY DOCTOR
-======================= */
+export const getRapportsByParent = async (parentId: string) => {
+  try {
+    await connectDB();
+    // Import Child here to avoid circular dependency issues
+    const { Child } = await import("@/models/Child");
+    // Get all children belonging to this parent
+    const children = await Child.find({ parentId }).select("_id age");
+    if (!children.length) return { success: true, rapports: [] };
+    const childIds = children.map((c: any) => c._id);
+    const childAgeMap: Record<string, number> = {};
+    children.forEach((c: any) => { childAgeMap[c._id.toString()] = c.age; });
+    // Fetch all non-draft rapports for these children
+    const rapports = await Rapport.find({ childId: { $in: childIds }, isDraft: { $ne: true } })
+      .populate("doctorId", "firstname lastname specialty")
+      .sort({ createdAt: -1 });
+    const result = rapports.map((r: any) => ({
+      ...JSON.parse(JSON.stringify(r)),
+      childAge: childAgeMap[r.childId?.toString()] ?? null,
+    }));
+    return { success: true, rapports: result };
+  } catch (error) {
+    console.error("Error fetching rapports by parent:", error);
+    return { success: false, message: "Failed to fetch rapports", rapports: [] };
+  }
+};
+
 export const getRapportsByDoctor = async (doctorId: string) => {
   try {
     await connectDB();
@@ -160,9 +169,6 @@ export const getRapportsByDoctor = async (doctorId: string) => {
   }
 };
 
-/* =======================
-   GET RAPPORT BY ID
-======================= */
 export const getRapportById = async (rapportId: string) => {
   try {
     await connectDB();

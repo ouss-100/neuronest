@@ -4,13 +4,10 @@ import connectDB from "@/lib/mongodb";
 import { Appointment, AppointmentStatus } from "@/models/Appointment";
 import { createDraftRapport } from "./rapportActions";
 import mongoose from "mongoose";
-import "@/models/Child"; // Ensure Child schema is registered for populate
-import "@/models/Doctor"; // Ensure Doctor schema is registered
-import "@/models/User"; // Ensure User schema is registered
+import "@/models/Child";
+import "@/models/Doctor";
+import "@/models/User";
 
-/* =======================
-   BOOK APPOINTMENT
-======================= */
 export const bookAppointment = async (data: {
   parentId: string;
   doctorId: string;
@@ -65,9 +62,6 @@ export const bookAppointment = async (data: {
   }
 };
 
-/* =======================
-   GET APPOINTMENTS BY PARENT
-======================= */
 export const getAppointmentsByParent = async (parentId: string) => {
   try {
     await connectDB();
@@ -83,9 +77,6 @@ export const getAppointmentsByParent = async (parentId: string) => {
   }
 };
 
-/* =======================
-   GET APPOINTMENTS BY DOCTOR
-======================= */
 export const getAppointmentsByDoctor = async (doctorId: string) => {
   try {
     await connectDB();
@@ -101,9 +92,6 @@ export const getAppointmentsByDoctor = async (doctorId: string) => {
   }
 };
 
-/* =======================
-   UPDATE APPOINTMENT STATUS
-======================= */
 export const updateAppointmentStatus = async (
   appointmentId: string, 
   status: AppointmentStatus

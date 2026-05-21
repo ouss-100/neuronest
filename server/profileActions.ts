@@ -3,11 +3,7 @@
 import connectDB from "@/lib/mongodb";
 import { Parent } from "@/models/Parent";
 import { Doctor } from "@/models/Doctor";
-import mongoose from "mongoose";
 
-/* =======================
-   PARENT PROFILE
-======================= */
 export const getParentProfile = async (parentId: string) => {
   try {
     await connectDB();
@@ -32,9 +28,6 @@ export const updateParentProfile = async (parentId: string, data: any) => {
   }
 };
 
-/* =======================
-   DOCTOR PROFILE
-======================= */
 export const getDoctorProfile = async (doctorId: string) => {
   try {
     await connectDB();

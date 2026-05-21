@@ -4,7 +4,6 @@ import { useSession } from "next-auth/react";
 import type { Doctor } from "@/types/doctor";
 import { bookAppointment } from "@/server/appointmentActions";
 import { toast } from "sonner";
-import { MOCK_PARENT_ID } from "@/lib/constants";
 
 interface DoctorProfileProps {
   doctor: Doctor;
@@ -30,11 +29,16 @@ export default function DoctorProfile({ doctor, distance, onClose }: DoctorProfi
 
   const handleBook = async () => {
     if (!bookingDate) return;
+    const parentId = session?.user?.id;
+    if (!parentId) {
+      toast.error("You must be logged in to book an appointment.");
+      return;
+    }
     setIsSubmitting(true);
     const res = await bookAppointment({
       doctorId: (doctor as any)._id || (doctor as any).id || "temp-doctor-id",
-      parentId: session?.user?.id || MOCK_PARENT_ID,
-      childId: undefined, // Let the backend default to the parent's child
+      parentId,
+      childId: undefined,
       appointmentDate: new Date(bookingDate),
       reason: bookingReason || "Consultation",
     });

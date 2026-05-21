@@ -4,13 +4,14 @@ import { motion } from "framer-motion";
 import { Save, User, Bell, Stethoscope, Mail, Phone, MapPin, Award, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getDoctorProfile, updateDoctorProfile } from "@/server/profileActions";
-import { MOCK_DOCTOR_ID } from "@/lib/constants";
+import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 
 export default function DoctorSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const { data: session, status } = useSession();
   const [profile, setProfile] = useState({
     firstname: "",
     lastname: "",
@@ -38,9 +39,12 @@ export default function DoctorSettings() {
   });
 
   useEffect(() => {
+    if (status === "loading") return;
     async function load() {
       setLoading(true);
-      const res = await getDoctorProfile(MOCK_DOCTOR_ID);
+      const doctorId = session?.user?.id;
+      if (!doctorId) { setLoading(false); return; }
+      const res = await getDoctorProfile(doctorId);
       if (res.success && res.doctor) {
         setProfile({
           firstname: res.doctor.firstname || "",
@@ -57,7 +61,7 @@ export default function DoctorSettings() {
       setLoading(false);
     }
     load();
-  }, []);
+  }, [session?.user?.id, status]);
 
   const handleProfileChange = (field: string, value: string) => {
     setProfile((prev) => ({ ...prev, [field]: value }));
@@ -69,7 +73,9 @@ export default function DoctorSettings() {
 
   const handleSave = async () => {
     setSaving(true);
-    const res = await updateDoctorProfile(MOCK_DOCTOR_ID, {
+    const doctorId = session?.user?.id;
+    if (!doctorId) { setSaving(false); toast.error("Not authenticated"); return; }
+    const res = await updateDoctorProfile(doctorId, {
       firstname: profile.firstname,
       lastname: profile.lastname,
       email: profile.email,

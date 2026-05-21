@@ -46,7 +46,7 @@ export default function DoctorDashboard() {
   }
 
   return (
-    <div className="space-y-6 max-w-6xl">
+    <div className="space-y-6">
       <div className="flex flex-col lg:flex-row justify-between gap-4">
         <div>
           <h1 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">Good morning 👋</h1>

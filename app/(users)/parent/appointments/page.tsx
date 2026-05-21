@@ -16,7 +16,6 @@ import {
 import { getAppointmentsByParent } from "@/server/appointmentActions";
 import { useSession } from "next-auth/react";
 import { format } from "date-fns";
-import { MOCK_PARENT_ID } from "@/lib/constants";
 
 const statusConfig: Record<
   string,
@@ -54,7 +53,7 @@ export default function ParentAppointments() {
     if (status === "loading") return;
 
     async function load() {
-      const parentId = session?.user?.id || MOCK_PARENT_ID;
+      const parentId = session?.user?.id;
       if (!parentId) return;
       setLoading(true);
       const res = await getAppointmentsByParent(parentId);

@@ -9,9 +9,7 @@ import Notification from "@/models/Notification";
 import Contact from "@/models/Contact";
 import { Assessment } from "@/models/Assessment";
 
-/* =======================
-   GET ALL USERS
-======================= */
+
 export const getAllUsers = async () => {
   try {
     await connectDB();
@@ -24,9 +22,6 @@ export const getAllUsers = async () => {
   }
 };
 
-/* =======================
-   GET PENDING DOCTORS
-======================= */
 export const getPendingDoctors = async () => {
   try {
     await connectDB();
@@ -38,9 +33,6 @@ export const getPendingDoctors = async () => {
   }
 };
 
-/* =======================
-   ACTIVATE DOCTOR
-======================= */
 export const activateDoctor = async (doctorId: string) => {
   try {
     await connectDB();
@@ -65,9 +57,6 @@ export const activateDoctor = async (doctorId: string) => {
   }
 };
 
-/* =======================
-   GET ADMIN DASHBOARD DATA
-======================= */
 export const getAdminDashboardData = async () => {
   try {
     await connectDB();
@@ -185,9 +174,6 @@ export const getAdminDashboardData = async () => {
   }
 };
 
-/* =======================
-   TOGGLE USER STATUS
-======================= */
 export const toggleUserStatus = async (userId: string) => {
   try {
     await connectDB();
@@ -211,17 +197,12 @@ export const toggleUserStatus = async (userId: string) => {
   }
 };
 
-/* =======================
-   GET NOTIFICATIONS
-======================= */
 export const getNotifications = async () => {
   try {
     await connectDB();
 
-    // Auto-seed if notifications count is 0
     const count = await Notification.countDocuments();
     if (count === 0) {
-      // Seed contacts
       const contacts = await Contact.find({}).sort({ createdAt: -1 });
       for (const contact of contacts) {
         await Notification.create({
@@ -233,7 +214,6 @@ export const getNotifications = async () => {
         });
       }
 
-      // Seed pending doctors
       const pendingDocs = await Doctor.find({ isActive: false, isVerified: true });
       for (const doc of pendingDocs) {
         await Notification.create({
@@ -254,9 +234,6 @@ export const getNotifications = async () => {
   }
 };
 
-/* =======================
-   MARK NOTIFICATION AS READ
-======================= */
 export const markNotificationAsRead = async (id: string) => {
   try {
     await connectDB();
@@ -275,9 +252,6 @@ export const markNotificationAsRead = async (id: string) => {
   }
 };
 
-/* =======================
-   MARK ALL NOTIFICATIONS AS READ
-======================= */
 export const markAllNotificationsAsRead = async () => {
   try {
     await connectDB();
@@ -289,9 +263,6 @@ export const markAllNotificationsAsRead = async () => {
   }
 };
 
-/* =======================
-   DELETE NOTIFICATION
-======================= */
 export const deleteNotificationAction = async (id: string) => {
   try {
     await connectDB();
@@ -306,9 +277,6 @@ export const deleteNotificationAction = async (id: string) => {
   }
 };
 
-/* =======================
-   CLEAR ALL NOTIFICATIONS
-======================= */
 export const clearAllNotifications = async () => {
   try {
     await connectDB();
